@@ -8,13 +8,24 @@
 // GPS using Serial5 pins (TX5 20, RX5 21)
 #define GPS_SERIAL Serial5
 
+enum class State: uint8_t {
+    PAD_IDLE,
+    BOOST,
+    COAST,
+    APOGEE,
+    DROGUE_DEPLOYED,
+    MAIN_DEPLOYED,
+    LANDED
+};
+
 GpsManager gps(GPS_SERIAL, 115200);
 BmpManager bmp;
 ImuManager imu;
 RadioManager radio;
 bool radio_active = false;
+State current_state = State::PAD_IDLE;
 
-double zero_altitude;
+double ground_altitude_m;
 
 void setup() {
     Serial.begin(115200);    // USB Serial for Monitor
@@ -69,32 +80,7 @@ void loop() {
     bool printed = false;
     char radio_buf[64]; // Buffer for radio packets
     
-    // // updates gps and if sucessful prints data
-    // if (gps.Update()) {
-    //     update = true;
-    //     locationData gps_data = gps.GetLocationData();
-        
-    //     if (gps_data.is_valid) {
-    //         Serial.printf("Lat %.6f, Lng %.6f, Alt %.2fft, Sats %d\n", gps_data.lat, gps_data.lng, gps_data.alt, gps_data.sats);
-    //         printed = true;
-    //         // Send GPS packet
-    //         snprintf(radio_buf, sizeof(radio_buf), "GPS:%.4f,%.4f,%.0f", gps_data.lat, gps_data.lng, gps_data.alt);
-    //         if (radio_active) {
-    //             radio.Transmit(radio_buf);
-    //         }
-    //     } else {
-    //         Serial.println("Waiting for FIX");
-    //         printed = true;
-    //     }
-
-    //     if(last_gps_time != 0 && counter % 100 == 0){
-    //         sps = 1 / ((millis() - last_gps_time) / 1000.0);
-    //         Serial.printf("GPS SPS: %.1f\n", sps);
-    //         printed = true;
-    //     }
-    //     last_gps_time = millis();
-    // }
-
+    // send gps data to ground station
     if (gps.Update()) {
         locationData gps_data = gps.GetLocationData();
         
@@ -119,13 +105,32 @@ void loop() {
     // if (bmp.Update()) {
     //     bmpData bmp_data = bmp.GetBmpData();
 
-    //     snprintf(radio_buf, sizeof(radio_buf), "ALT:%.2f", bmp_data.altitude - zero_altitude);
-    //     if (radio_active) {
-    //         radio.Transmit(radio_buf);
-    //         Serial.printf("TX: %s\n", radio_buf);
-    //     }
-    // }
+        snprintf(radio_buf, sizeof(radio_buf), "ALT:%.2f", raw_bmp_data.altitude - ground_altitude_m);
+        if (radio_active) {
+            radio.Transmit(radio_buf);
+            Serial.printf("TX: %s\n", radio_buf);
+        }
+    }
 
+    // enter current state
+    switch (current_state) {
+        case State::PAD_IDLE:
+            break;
+        case State::BOOST:
+            break;
+        case State::COAST:
+            break;
+        case State::APOGEE:
+            break;
+        case State::DROGUE_DEPLOYED:
+            break;
+        case State::MAIN_DEPLOYED:
+            break;
+        case State::LANDED:
+            break;
+        default:
+            break;
+    }
 
     // if (imu.Update()) {
     //     update = true;
