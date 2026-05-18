@@ -1,8 +1,10 @@
 #include <Arduino.h>
 #include <optional>
 #include "BmpManager.h"
+#include "Altimeter.h"
 
-#define BUFFER_SIZE 100
+#define BOOST_TIME 4 // seconds to ignore pressure for apogee readings
+#define DROGUE_DROP_M 3 // the meters vertically down from apogee to deploy drogue chute
 
 enum class State: uint8_t {
     PAD_IDLE,
@@ -12,12 +14,10 @@ enum class State: uint8_t {
     MAIN_DEPLOYMENT,
     LANDED
 };
-
-BmpManager bmp;
-bool radio_active = false;
 State current_state = State::PAD_IDLE;
 
-double ground_altitude_m;
+BmpManager bmp;
+Altimeter altimeter;
 
 void setup() {
     Serial.begin(115200);    // USB Serial for Monitor
@@ -30,41 +30,73 @@ void setup() {
     bmp.setMode(BMP5XX_POWERMODE_CONTINUOUS, BMP5XX_ODR_240_HZ);
     bmp.setTempOSR(BMP5XX_OVERSAMPLING_1X);
     bmp.setPressureOSR(BMP5XX_OVERSAMPLING_1X);
+    bmp.setIIRCoeff(BMP5XX_IIR_FILTER_COEFF_3);
 
-    // check for a bmp update
-    while (!bmp.update()) {
-        delay(10);
-    }
-
-    BmpData bmp_data = bmp.getBmpData();
-    ground_altitude_m = bmp_data.altitude;
+    altimeter.setGroundMode(true);
 }
 
-double sps;
+double apogee = 0.0;
 
-int counter = 0;
-unsigned long last_print_time = 0;
+double boostStart_ms;
+int stateCounter = 0;
 
 void loop() {
     bool bmp_update = false;
-    bool printed = false;
     
     // gather raw altitude data
     BmpData raw_bmp_data;
     if (bmp.update()) {
         raw_bmp_data = bmp.getBmpData();
         bmp_update = true;
-        
     }
+
     if (bmp_update) {
+        altimeter.update(raw_bmp_data.altitude);
+        double agl = altimeter.getAltitudeAGL();
+
         // enter current state
         switch (current_state) {
             case State::PAD_IDLE:
+                if (agl > 15) {
+                    stateCounter++;
+                    if (stateCounter >= 3) {
+                        current_state = State::BOOST;
+                        boostStart_ms = millis();
+                        stateCounter = 0;
+                        Serial.println("STATE-CHANGE: BOOST");
+                    }
+                } else {
+                    stateCounter = 0;
+                }
                 break;
+
             case State::BOOST:
+                if (millis() - boostStart_ms > BOOST_TIME*1000) {
+                    current_state = State::COAST;
+                    Serial.println("STATE-CHANGE: COAST");
+                }
                 break;
+
             case State::COAST:
+                if (agl > apogee) {
+                    apogee = agl;
+                }
+
+                if (agl < (apogee - DROGUE_DROP_M)) {
+                    stateCounter++;
+
+                    if (stateCounter >= 3) {
+                        // deploy drogue
+                        stateCounter = 0;
+                        current_state = State::DROGUE_DEPLOYMENT;
+                        Serial.println("STATE-CHANGE: DROGUE_DEPLOYMENT");
+                    }
+                } else {
+                    stateCounter = 0;
+                }
+
                 break;
+
             case State::DROGUE_DEPLOYMENT:
                 break;
             case State::MAIN_DEPLOYMENT:
@@ -74,11 +106,9 @@ void loop() {
             default:
                 break;
         }
-        counter++;
-    }
-    
-    if (printed) {
-        Serial.println("==================");
+
+        // push info to flash or SD card
+
     }
 
     static unsigned long last_ping = 0;
@@ -86,5 +116,4 @@ void loop() {
         last_ping = millis();
         Serial.printf("Alive Ping: %d\n", millis() / 1000);
     }
-
 }
