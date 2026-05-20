@@ -7,17 +7,6 @@ void Altimeter::update(double raw_altitude) {
     } else {
         m_curAltitudeAGL = 0.0;
     }
-    
-    // set ground mode lockout
-    static int lockoutCounter = 0;
-    if (m_groundMode && m_curAltitudeAGL > 4.5) {
-        lockoutCounter++;
-        if (lockoutCounter >= 3) {
-            m_groundMode = false;
-        }
-    } else {
-        lockoutCounter = 0;
-    }
 
     // if in ground mode, set ground altitude
     if (m_groundMode) {
@@ -37,4 +26,3 @@ void Altimeter::setGroundMode(bool ground_mode) {
 bool Altimeter::getGroundMode() {
     return m_groundMode;
 }
-
