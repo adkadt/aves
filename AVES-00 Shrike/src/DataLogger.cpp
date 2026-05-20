@@ -24,6 +24,7 @@ bool DataLogger::begin(bool simulation_mode) {
             Serial.println("SIMULATION MODE ACTIVE: File Loaded.");
         } else {
             Serial.println("ERROR: COULD NOT CREATE SIM_OUT.CSV");
+            return false;
         }
     } else {
         char filename[15];
@@ -42,6 +43,9 @@ bool DataLogger::begin(bool simulation_mode) {
             flightLog.sync();
             m_sdActive = true;
             Serial.printf("SD Card Active. Logging to: %s\n", filename);
+        } else {
+            Serial.printf("ERROR: COULD NOT CREATE %s\n", filename);
+            return false;
         }
     }
     return true;
