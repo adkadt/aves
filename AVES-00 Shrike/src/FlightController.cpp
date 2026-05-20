@@ -36,7 +36,7 @@ void FlightController::transitionState(State next_state) {
 
 void FlightController::handlePadIdle(double agl, bool altitudeUpdate) {
     if (altitudeUpdate) {
-        if (agl > 15) {
+        if (agl > 4.5) {
             m_stateCounter++;
             if (m_stateCounter >= 10) {
                 m_altimeter.setGroundMode(false); // Lock in ground altitude
@@ -60,7 +60,7 @@ void FlightController::handleCoast(double agl, bool altitudeUpdate) {
             m_apogee = agl;
         }
         
-        if (agl < (m_apogee - DROGUE_DROP_M) && agl > MIN_DEPLOYMENT_ALT) {
+        if (agl < (m_apogee - DROGUE_DROP_M)) {
             m_stateCounter++;
             if (m_stateCounter >= 10) {
                 transitionState(State::DROGUE_DEPLOYMENT);
@@ -73,6 +73,11 @@ void FlightController::handleCoast(double agl, bool altitudeUpdate) {
 
 void FlightController::handleDrogueDeployment(double agl, bool altitudeUpdate) {
     if (!m_stateInit) {
+        if (m_apogee < MIN_DEPLOYMENT_ALT) {
+            Serial.println("WARN: Drogue deployment aborted");
+            transitionState(State::DROGUE_DESCENT);
+            return;
+        }
         digitalWrite(m_droguePin, HIGH);
         m_stateStartMs = millis();
         m_stateInit = true;
@@ -84,7 +89,7 @@ void FlightController::handleDrogueDeployment(double agl, bool altitudeUpdate) {
 
 void FlightController::handleDrogueDescent(double agl, bool altitudeUpdate) {
     if (altitudeUpdate) {
-        if (agl < MAIN_DEPLOYMENT_ALT && agl > MIN_DEPLOYMENT_ALT) {
+        if (agl < MAIN_DEPLOYMENT_ALT) {
             m_stateCounter++;
             if (m_stateCounter >= 3) {
                 transitionState(State::MAIN_DEPLOYMENT);
@@ -97,6 +102,11 @@ void FlightController::handleDrogueDescent(double agl, bool altitudeUpdate) {
 
 void FlightController::handleMainDeployment(double agl, bool altitudeUpdate) {
     if (!m_stateInit) {
+        if (m_apogee < MIN_DEPLOYMENT_ALT) {
+            Serial.println("WARN: Main deployment aborted");
+            transitionState(State::MAIN_DESCENT);
+            return;
+        }
         digitalWrite(m_mainPin, HIGH);
         m_stateStartMs = millis();
         m_stateInit = true;

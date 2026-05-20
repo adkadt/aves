@@ -9,7 +9,7 @@ constexpr unsigned long BOOST_TIME_MS = 2000; // milliseconds to ignore pressure
 constexpr double DROGUE_DROP_M = 3.0; // the meters vertically down from apogee to deploy drogue chute
 constexpr unsigned long FIRE_TIME_MS = 2000;
 constexpr double MAIN_DEPLOYMENT_ALT = 150.0; // meters AGL to deploy main chute at
-constexpr double MIN_DEPLOYMENT_ALT = 50.0; // the minimum AGL allowed to deploy a chute at
+constexpr double MIN_DEPLOYMENT_ALT = 30.0; // the minimum AGL allowed to deploy a chute at
 
 enum class State: uint8_t {
     PAD_IDLE, 
