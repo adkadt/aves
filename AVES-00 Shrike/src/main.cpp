@@ -17,6 +17,9 @@ constexpr unsigned long SD_WRITE_INTERVAL_MS = 500;
 constexpr uint8_t NEOPIXEL_PIN = 17;
 constexpr uint8_t NUMPIXELS = 1;
 
+constexpr uint8_t BUZZER_PIN = 5;
+
+
 #ifdef SIMULATION_MODE
     #warning "SIMULATION_MODE is enabled - disable before flight!"
     #include <cstdlib>
@@ -53,10 +56,11 @@ void setup() {
     digitalWrite(DROGUE_PIN, LOW);
     digitalWrite(MAIN_PIN, LOW);
 
+    pinMode(BUZZER_PIN, OUTPUT);
+
     pixel.begin();
     pixel.setBrightness(50);
-    uint32_t color = pixel.Color(0, 255, 0);
-    pixel.setPixelColor(0, color);
+    pixel.clear();
     pixel.show();
 
     Serial.begin(115200);    // USB Serial for Monitor
@@ -75,7 +79,6 @@ void setup() {
         bmp.setIIRCoeff(BMP5XX_IIR_FILTER_COEFF_3);
     }
 
-
     altimeter.setGroundMode(true);
 
     if (!logger.begin(SIMULATION_MODE)) {
@@ -84,6 +87,17 @@ void setup() {
     }
 
     updateStateLED(flightController.getState());
+
+    // Success chime
+    tone(BUZZER_PIN, 523);
+    delay(150);
+    tone(BUZZER_PIN, 659);
+    delay(150);
+    tone(BUZZER_PIN, 784);
+    delay(150);
+    tone(BUZZER_PIN, 1046);
+    delay(400);
+    noTone(BUZZER_PIN);
 }
 
 void loop() {
@@ -119,10 +133,31 @@ void loop() {
     State new_state = flightController.update(agl, altitudeUpdate);
     if (new_state != current_state) {
         updateStateLED(new_state);
+        tone(BUZZER_PIN, 2000, 200);
     }
 
     logger.sync();
     printTelemetry(agl, new_state, flightController.getApogee());
+
+    // chirp while idle on the pad
+    if (new_state == State::PAD_IDLE || new_state == State::LANDED) {
+        static unsigned long last_heartbeat = 0;
+        static int beeps_remaining = 0;
+        static unsigned long last_beep_time = 0;
+
+        // Trigger the start of a beep sequence every 2.5 seconds
+        if (millis() - last_heartbeat >= 2500) {
+            beeps_remaining = (new_state == State::LANDED) ? 3 : 1;
+            last_heartbeat = millis();
+        }
+
+        // Process the active beep sequence
+        if (beeps_remaining > 0 && millis() - last_beep_time >= 150) {
+            tone(BUZZER_PIN, 3000, 50);
+            last_beep_time = millis();
+            beeps_remaining--;
+        }
+    }
 }
 
 
@@ -134,14 +169,14 @@ void updateStateLED(State state) {
     uint32_t color = 0;
 
     switch (state) {
-        case State::PAD_IDLE:          color = pixel.Color(0, 0, 255);     break; // Blue
-        case State::BOOST:             color = pixel.Color(0, 255, 0);     break; // Green
-        case State::COAST:             color = pixel.Color(255, 255, 0);   break; // Yellow
-        case State::DROGUE_DEPLOYMENT: color = pixel.Color(255, 0, 255);   break; // Purple
-        case State::DROGUE_DESCENT:    color = pixel.Color(0, 255, 255);   break; // Cyan
-        case State::MAIN_DEPLOYMENT:   color = pixel.Color(255, 255, 255); break; // White
-        case State::MAIN_DESCENT:      color = pixel.Color(255, 128, 0);   break; // Orange
-        case State::LANDED:            color = pixel.Color(255, 0, 0);     break; // Red
+        case State::PAD_IDLE:          color = pixel.Color(0, 255, 0);     break; // Green - Ready
+        case State::BOOST:             color = pixel.Color(255, 255, 255); break; // White - Motor firing
+        case State::COAST:             color = pixel.Color(0, 0, 255);     break; // Blue - Sky
+        case State::DROGUE_DEPLOYMENT: color = pixel.Color(255, 255, 0);   break; // Yellow - First Event
+        case State::DROGUE_DESCENT:    color = pixel.Color(255, 128, 0);   break; // Orange - Falling
+        case State::MAIN_DEPLOYMENT:   color = pixel.Color(255, 0, 255);   break; // Magenta - Second Event
+        case State::MAIN_DESCENT:      color = pixel.Color(0, 255, 255);   break; // Cyan - Falling
+        case State::LANDED:            color = pixel.Color(255, 0, 0);     break; // Red - Done
     }
 
     pixel.setPixelColor(0, color);
@@ -157,10 +192,12 @@ void fatalError(int num) {
         for (int i = 0; i < num; i++) {
             pixel.setPixelColor(0, pixel.Color(255, 0, 0));
             pixel.show();
+            tone(BUZZER_PIN, 1000);
             delay(300);
             
             pixel.clear();
             pixel.show();
+            noTone(BUZZER_PIN);
             delay(300);
         }
         
