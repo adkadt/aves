@@ -6,7 +6,7 @@
 #include "FlightController.h"
 #include <Adafruit_NeoPixel.h>
 
-#define SIMULATION_MODE false
+#define SIMULATION_MODE_ENABLED false
 
 constexpr uint8_t DROGUE_PIN = 13; // ! Set to actual pin when not testing
 constexpr uint8_t MAIN_PIN = 13; // ! Set to actual pin when not testing
@@ -20,8 +20,8 @@ constexpr uint8_t NUMPIXELS = 1;
 constexpr uint8_t BUZZER_PIN = 5;
 
 
-#ifdef SIMULATION_MODE
-    #warning "SIMULATION_MODE is enabled - disable before flight!"
+#if SIMULATION_MODE_ENABLED
+    #warning "SIMULATION_MODE_ENABLED is enabled - disable before flight!"
     #include <cstdlib>
     double injectNoise(double altitude, double stddev_m = 0.4) {
         // Box-Muller transform for Gaussian noise
@@ -31,7 +31,6 @@ constexpr uint8_t BUZZER_PIN = 5;
         return altitude + gaussian * stddev_m;
     }
 #endif
-
 // --------------
 // System Objects
 // --------------
@@ -65,7 +64,7 @@ void setup() {
 
     Serial.begin(115200);    // USB Serial for Monitor
     
-    if (SIMULATION_MODE) {
+    if (SIMULATION_MODE_ENABLED) {
         while (!Serial) delay(10);      // ! [REMOVE FOR FLIGHT] Waits for serial
     } else {
         if (!bmp.begin()) {
@@ -81,7 +80,7 @@ void setup() {
 
     altimeter.setGroundMode(true);
 
-    if (!logger.begin(SIMULATION_MODE)) {
+    if (!logger.begin(SIMULATION_MODE_ENABLED)) {
         Serial.println("--SD CARD FAILED TO MOUNT--");
         fatalError(2);
     }
@@ -104,7 +103,7 @@ void loop() {
     bool altitudeUpdate = false;
     double rawSensorValue = 0.0;
 
-    if (SIMULATION_MODE) {
+    if (SIMULATION_MODE_ENABLED) {
         if (Serial.available()) {
             rawSensorValue = Serial.parseFloat();
             Serial.readStringUntil('\n'); // Clear the rest of the buffer (including newline)
@@ -206,6 +205,7 @@ void fatalError(int num) {
 }
 
 void printTelemetry(double agl, State state, double apogee) {
+    if (SIMULATION_MODE_ENABLED) return;
     static unsigned long last_ping = 0;
     if (millis() - last_ping >= 250) { // Print 4 times a second
         last_ping = millis();
