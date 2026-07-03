@@ -1,2 +1,1 @@
-# FADS-Flight-Computer
-FADS (Flight Avionics &amp; Data System)
+# AVES-Flight-Computer
