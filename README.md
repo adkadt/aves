@@ -1,5 +1,3 @@
-# AVES
-
 <div align="center">
 
 # AVES
