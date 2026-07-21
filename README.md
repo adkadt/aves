@@ -1,1 +1,1 @@
-# AVES-Flight-Computer
+# AVES (Aerospace Vehicle Embedded Suite)
