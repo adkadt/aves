@@ -4,7 +4,7 @@
 #include <cstdint>
 
 namespace {
-    Adafruit_NeoPixel boardLed = Adafruit_NeoPixel(1, Pins::LED_PIN, NEO_RGB + NEO_KHZ800);
+    Adafruit_NeoPixel boardLed = Adafruit_NeoPixel(1, Pins::LED, NEO_RGB + NEO_KHZ800);
     
     constexpr uint32_t FADE_INTERVAL_MS = 20;
     constexpr uint8_t FADE_AMOUNT = 2;
