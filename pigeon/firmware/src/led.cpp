@@ -67,6 +67,9 @@ void Led::update() {
 }
 
 void Led::setState(State state) {
+    if (ledData.state == state)
+        return;
+
     ledData.state = state;
     ledData.lastUpdate = millis();
     ledData.lastFadeUpdate = millis();
