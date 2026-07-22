@@ -13,6 +13,7 @@ namespace Gps {
     };
 
     struct Data {
+        Position rawPosition;
         Position position;
         
         float speed;

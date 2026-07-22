@@ -27,6 +27,10 @@ namespace Config {
     // GPS Config
     constexpr uint32_t GPS_BAUD_RATE = 9600;
     constexpr uint32_t GPS_TIMEOUT_MS = 1000;
+
+    constexpr double GPS_MIN_ALPHA = 0.1;
+    constexpr double GPS_MAX_ALPHA = 0.8;
+    constexpr float GPS_MAX_SPEED = 50.0f;
 }
 
 #endif
