@@ -29,6 +29,7 @@ namespace Gps {
     
     bool hasFix();
     bool isConnected();
+    bool hasLocation();
 
     const Data& getData();
 }

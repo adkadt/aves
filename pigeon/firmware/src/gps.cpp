@@ -9,7 +9,8 @@ namespace {
     
     Gps::Data gpsData{};
 
-    uint32_t lastUpdate = 0;
+    uint32_t lastSentenceReceived = 0;
+    uint32_t lastLocationUpdate = 0;
     bool hasReceivedData = false;
 }
 
@@ -31,6 +32,7 @@ void Gps::update() {
                 gpsData.position.latitude = gps.location.lat();
                 gpsData.position.longitude = gps.location.lng();
                 gpsData.position.altitude = gps.altitude.meters();
+                lastLocationUpdate = millis();
             }
 
             if (gps.speed.isValid())
@@ -55,7 +57,7 @@ void Gps::update() {
             }
         
             // bookkeeping
-            lastUpdate = millis();
+            lastSentenceReceived = millis();
             hasReceivedData = true;
         }
     }
@@ -66,8 +68,13 @@ bool Gps::hasFix() {
 }
 
 bool Gps::isConnected() {
-    return hasReceivedData && (millis() - lastUpdate < Config::GPS_TIMEOUT_MS);
+    return hasReceivedData && (millis() - lastSentenceReceived < Config::GPS_TIMEOUT_MS);
 }
+
+bool Gps::hasLocation() {
+    return gps.location.isValid() && gps.location.age() < Config::GPS_TIMEOUT_MS;
+}
+
 
 const Gps::Data& Gps::getData() {
     return gpsData;
