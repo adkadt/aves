@@ -42,3 +42,29 @@
 
 # vscode config files
 .vscode
+
+# KiCad lock files
+*.kicad_pro.lck
+*.lck
+
+# Backup files
+*-bak
+*.bak
+
+# Auto-save files
+*.autosave
+_autosave-*
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
