@@ -31,6 +31,9 @@ namespace Config {
     constexpr double GPS_MIN_ALPHA = 0.1;
     constexpr double GPS_MAX_ALPHA = 0.8;
     constexpr float GPS_MAX_SPEED = 50.0f;
+
+    // LoRa Config
+    constexpr uint8_t LORA_MAX_PAYLOAD_LENGTH = 255;
 }
 
 #endif
