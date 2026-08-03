@@ -265,7 +265,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "pigeon.kicad_pro",
+    "filename": "Pigeon.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -437,7 +437,7 @@
         "uuid": "a7136980-a814-4eb3-a2ce-ec6a4a18cc14"
       }
     ],
-    "used_designators": "U3",
+    "used_designators": "U3,#PWR7-8",
     "variants": []
   },
   "sheets": [
