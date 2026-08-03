@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "AVES")(type "KiCad")(uri "${KIPRJMOD}/../../../kicad-libraries/symbols/AVES.kicad_sym")(options "")(descr ""))
+)

@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "AVES")(type "KiCad")(uri "C:/Users/adamk/Documents/GitHub/aves/kicad-libraries/AVES.pretty")(options "")(descr ""))
+)
