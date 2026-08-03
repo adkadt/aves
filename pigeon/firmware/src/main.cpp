@@ -2,47 +2,79 @@
 #include "config.hpp"
 
 #include "led.hpp"
+#include "gps.hpp"
 
 void setup() {
     Serial.begin(Config::BAUD_RATE);
     Led::begin();
+    Gps::begin();
+    Led::setState(Led::State::GPS_SEARCHING);
 }
 
 void loop() {
-    unsigned long start;
+    Gps::update();
+    Led::update();
 
-    start = millis();
-    Serial.println("GPS_SEARCHING");
-    Led::setState(Led::State::GPS_SEARCHING);
-    while (millis() - start < 10000) {
-        Led::update();
-    }
+    static uint32_t lastPrint = 0;
 
-    start = millis();
-    Serial.println("GPS_LOCK");
-    Led::setState(Led::State::GPS_LOCK);
-    while (millis() - start < 10000) {
-        Led::update();
-    }
+    if (millis() - lastPrint >= 1000)
+    {
+        lastPrint = millis();
 
-    start = millis();
-    Serial.println("TRANSMITTING");
-    Led::setState(Led::State::TRANSMITTING);
-    while (millis() - start < 10000) {
-        Led::update();
-    }
+        Serial.println();
 
-    start = millis();
-    Serial.println("ERROR");
-    Led::setState(Led::State::ERROR);
-    while (millis() - start < 10000) {
-        Led::update();
+        Serial.print("Connected: ");
+        Serial.println(Gps::isConnected() ? "Yes" : "No");
+
+        Serial.print("Fix: ");
+        Serial.println(Gps::hasFix() ? "Yes" : "No");
+
+        Serial.print("Location: ");
+        Serial.println(Gps::hasLocation() ? "Yes" : "No");
+
+        if (!Gps::hasLocation())
+            Led::setState(Led::State::GPS_SEARCHING);
+        else
+            Led::setState(Led::State::GPS_LOCK);
+
+        if (Gps::isConnected())
+        {
+            const Gps::Data& data = Gps::getData();
+
+            Serial.print("Latitude: ");
+            Serial.println(data.position.latitude, 6);
+
+            Serial.print("Longitude: ");
+            Serial.println(data.position.longitude, 6);
+
+            Serial.print("Altitude: ");
+            Serial.print(data.position.altitude);
+            Serial.println(" m");
+
+            Serial.print("Speed: ");
+            Serial.print(data.speed);
+            Serial.println(" km/h");
+
+            Serial.print("Course: ");
+            Serial.print(data.course);
+            Serial.println(" deg");
+
+            Serial.print("Satellites: ");
+            Serial.println(data.satellites);
+
+            Serial.print("HDOP: ");
+            Serial.println(data.hdop);
+
+            Serial.printf(
+                "UTC: %02u:%02u:%02u %02u/%02u/%04u\n",
+                data.utcTime.hour,
+                data.utcTime.minute,
+                data.utcTime.second,
+                data.utcTime.day,
+                data.utcTime.month,
+                data.utcTime.year
+            );
+        }
     }
     
-    start = millis();
-    Serial.println("OFF");
-    Led::setState(Led::State::OFF);
-    while (millis() - start < 5000) {
-        Led::update();
-    }    
 }
