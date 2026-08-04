@@ -3165,7 +3165,7 @@
 		(uuid "2a1c3b98-2a0c-4898-951f-0c0f202e92ac")
 	)
 	(label "GPS_FIX"
-		(at 81.28 62.23 180)
+		(at 81.28 58.42 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3215,7 +3215,7 @@
 		(uuid "5c342389-b959-43b4-aab4-414ac49c7bfc")
 	)
 	(label "GPS_RX"
-		(at 81.28 54.61 180)
+		(at 81.28 50.8 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3235,7 +3235,7 @@
 		(uuid "6d7351ba-1d11-4561-80e4-08610976bf99")
 	)
 	(label "GPS_PPS"
-		(at 81.28 50.8 180)
+		(at 81.28 62.23 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3265,7 +3265,7 @@
 		(uuid "9f7b078b-87ee-4e6c-b658-5eed9fba8e84")
 	)
 	(label "GPS_TX"
-		(at 81.28 58.42 180)
+		(at 81.28 54.61 180)
 		(effects
 			(font
 				(size 1.27 1.27)
