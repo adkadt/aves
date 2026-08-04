@@ -51,7 +51,7 @@
       "conflict_shadows",
       "shapes"
     ],
-    "visible_layers": "ffffffff_ffffffff_ffffffff_ffffffff",
+    "visible_layers": "ffffffff_ffffffff_fffffff7_ffffffff",
     "zone_display_mode": 0
   },
   "git": {
@@ -61,7 +61,7 @@
     "ssh_key": ""
   },
   "meta": {
-    "filename": "pigeon.kicad_prl",
+    "filename": "Pigeon.kicad_prl",
     "version": 5
   },
   "net_inspector_panel": {
