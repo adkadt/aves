@@ -34,6 +34,14 @@ namespace LoRa {
     bool send(const Packet& packet);
     bool receive(Packet& packet);
 
+    Packet LoRa::createPacket(
+        uint8_t destination, 
+        uint8_t source, 
+        PacketType type, 
+        const uint8_t* payload,
+        uint8_t length
+    );
+
 }
 
 #endif // LORA_HPP

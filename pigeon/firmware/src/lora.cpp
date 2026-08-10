@@ -2,20 +2,26 @@
 #include "config.h"
 
 #include <RadioLib.h>
+#include <cstring> // Required for memcpy
 
 namespace {
-    SX1262 radio = new Module(
-        Pins::LORA_SCK, 
-        Pins::LORA_MISO, 
-        Pins::LORA_MOSI, 
-        Pins::LORA_CS
+    Module module(
+        Pins::LORA_CS,
+        Pins::LORA_DIO0,
+        Pins::LORA_RST
     );
+
+    SX1276 radio(&module);
 
     int state = 0;
 }
 
 void LoRa::begin() {
     state = radio.begin();
+
+    if (state != RADIOLIB_ERR_NONE) {
+        // TODO: ADD ERROR HANDLING
+    }
 }
 
 void LoRa::update() {
@@ -32,8 +38,26 @@ bool LoRa::available() {
 
 bool LoRa::send(const Packet& packet) {
     return false;
+
+    // Packet packet;
+    packet.rssi = radio.getRSSI();
+    packet.snr = radio.getSNR();
 }
 
-bool LoRa::receive(Packet& packet) {
-    return false;
+LoRa::Packet LoRa::createPacket(
+    uint8_t destination, 
+    uint8_t source, 
+    PacketType type, 
+    const uint8_t* payload,
+    uint8_t length
+) {
+    Packet packet;
+    packet.destination = destination;
+    packet.source = source;
+    packet.type = static_cast<uint8_t>(type); // Cast enum to underlying type
+    memcpy(packet.payload, payload, length); // Copy payload data
+    packet.rssi = 0;
+    packet.snr = 0;
+
+    return packet;
 }

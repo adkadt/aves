@@ -6,18 +6,25 @@
 namespace Pins {
     // LED
     constexpr uint8_t LED = 21;
-
+    
     // GPS
-    constexpr uint8_t GPS_RX = 13;
-    constexpr uint8_t GPS_TX = 12;
-
+    constexpr uint8_t GPS_RX = 2;
+    constexpr uint8_t GPS_TX = 3;
+    constexpr uint8_t GPS_FIX = 4;
+    constexpr uint8_t GPS_PPS = 5;   
+    
     // LoRa
-    constexpr uint8_t LORA_SCK = 0;
-    constexpr uint8_t LORA_MISO = 0;
-    constexpr uint8_t LORA_MOSI = 0;
-    constexpr uint8_t LORA_CS = 0;
-    constexpr uint8_t LORA_RST = 0;
-    constexpr uint8_t LORA_IRQ = 0; // G0, IRQ/ DIO0
+    constexpr uint8_t LORA_SCK = 11;
+    constexpr uint8_t LORA_MISO = 10;
+    constexpr uint8_t LORA_MOSI = 9;
+    constexpr uint8_t LORA_CS = 8;
+    constexpr uint8_t LORA_RST = 7;
+    constexpr uint8_t LORA_DIO0 = 12; // G0, IRQ/ DIO0
+    
+    // Misc
+    constexpr uint8_t VBAT_SENSE = 1;
+    constexpr uint8_t BUZZER = 6;
+    constexpr uint8_t MODE_SWITCH = 13;
 }
 
 namespace Config {

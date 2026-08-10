@@ -1,14 +1,19 @@
 #include <Arduino.h>
 #include "config.hpp"
+#include <SPI.h>
 
 #include "led.hpp"
 #include "gps.hpp"
+#include "lora.hpp"
 
 void setup() {
     Serial.begin(Config::BAUD_RATE);
     Led::begin();
     Gps::begin();
     Led::setState(Led::State::GPS_SEARCHING);
+
+    SPI.begin(Pins::LORA_SCK, Pins::LORA_MISO, Pins::LORA_MOSI);
+    LoRa::begin();
 }
 
 void loop() {
