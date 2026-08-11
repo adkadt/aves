@@ -11,20 +11,20 @@ void setup() {
     System::begin();
     Led::begin();
 
-void setup() {
     Serial.begin(Config::BAUD_RATE);
-    Led::begin();
-    Gps::begin();
-    Led::setState(Led::State::GPS_SEARCHING);
-
     SPI.begin(Pins::LORA_SCK, Pins::LORA_MISO, Pins::LORA_MOSI);
-    LoRa::begin();
+    
+    // LoRa::begin();
+    
+    Gps::begin();
 }
+
+
 
 void loop() {
     System::update();
-    Gps::update();
     Led::update();
+    Gps::update();
 
     static uint32_t lastPrint = 0;
 
@@ -44,9 +44,9 @@ void loop() {
         Serial.println(Gps::hasLocation() ? "Yes" : "No");
 
         if (!Gps::hasLocation())
-            Led::setState(Led::State::GPS_SEARCHING);
+            System::setState(System::State::GPS_SEARCHING);
         else
-            Led::setState(Led::State::GPS_LOCK);
+            System::setState(System::State::GPS_LOCK);
 
         if (Gps::isConnected())
         {

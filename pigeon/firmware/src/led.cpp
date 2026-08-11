@@ -1,7 +1,9 @@
-#include "led.hpp"
 #include <Adafruit_NeoPixel.h>
-#include "config.hpp"
 #include <cstdint>
+
+#include "system.hpp"
+#include "led.hpp"
+#include "config.hpp"
 
 namespace {
     Adafruit_NeoPixel boardLed = Adafruit_NeoPixel(1, Pins::LED, NEO_RGB + NEO_KHZ800);
@@ -11,6 +13,7 @@ namespace {
     constexpr uint8_t BRIGHTNESS_MAX = 150; // 255
     constexpr uint8_t BRIGHTNESS_MIN = 0; // 0
     
+    constexpr uint32_t COLOR_STARTUP = 0x0000FFu; // blue
     constexpr uint32_t COLOR_ERROR = 0xFF0000u; // red
     constexpr uint32_t COLOR_GPS_SEARCHING = 0x00FFFFu; // cyan
     constexpr uint32_t COLOR_GPS_LOCK = 0x00FF00u; // green
@@ -18,7 +21,6 @@ namespace {
     constexpr uint32_t COLOR_OFF = 0x000000u; // black
 
     struct LedData {
-        Led::State state;
         uint32_t lastUpdate;
         uint32_t lastFadeUpdate;
         uint8_t brightness;
@@ -32,10 +34,11 @@ namespace {
 }
 
 void Led::begin() {
+    pinMode(Pins::LED, OUTPUT);
+
     boardLed.begin();
     boardLed.show();
 
-    ledData.state = Led::State::OFF;
     ledData.lastUpdate = 0;
     ledData.lastFadeUpdate = 0;
     ledData.brightness = 0;
@@ -43,38 +46,33 @@ void Led::begin() {
 }
 
 void Led::update() {
-    uint32_t now = millis();
-    switch (ledData.state) {
-        case State::GPS_SEARCHING:
+    if (System::stateChanged()) {
+        ledData.lastUpdate = millis();
+        ledData.lastFadeUpdate = millis();
+        ledData.brightness = BRIGHTNESS_MIN;
+        ledData.fadingUp = true;
+    }
+
+    switch (System::getState()) {
+        case System::State::STARTUP:
+            ::solid(COLOR_STARTUP);
+            break;
+        case System::State::GPS_SEARCHING:
             ::pulse(COLOR_GPS_SEARCHING);
             break;
-        case State::GPS_LOCK:
+        case System::State::GPS_LOCK:
             ::solid(COLOR_GPS_LOCK);
             break;
-        case State::TRANSMITTING:
+        case System::State::TRANSMITTING:
             ::blink(COLOR_TRANSMITTING);
             break;
-        case State::ERROR:
+        case System::State::ERROR:
             ::blink(COLOR_ERROR);
-            break;
-        case State::OFF:
-            ::solid(COLOR_OFF);
             break;
         default:
             ::solid(COLOR_OFF);
             break;
     }
-}
-
-void Led::setState(State state) {
-    if (ledData.state == state)
-        return;
-
-    ledData.state = state;
-    ledData.lastUpdate = millis();
-    ledData.lastFadeUpdate = millis();
-    ledData.fadingUp = true;
-    ledData.brightness = BRIGHTNESS_MIN;
 }
 
 
