@@ -4,19 +4,20 @@
 
 #include "system.hpp"
 #include "led.hpp"
+#include "buzzer.hpp"
 #include "gps.hpp"
 #include "lora.hpp"
 
 void setup() {
     System::begin();
     Led::begin();
+    Buzzer::begin();
 
     Serial.begin(Config::BAUD_RATE);
     SPI.begin(Pins::LORA_SCK, Pins::LORA_MISO, Pins::LORA_MOSI);
     
-    // LoRa::begin();
-    
     Gps::begin();
+    // LoRa::begin();
 }
 
 
@@ -24,6 +25,8 @@ void setup() {
 void loop() {
     System::update();
     Led::update();
+    Buzzer::update();
+
     Gps::update();
 
     static uint32_t lastPrint = 0;
