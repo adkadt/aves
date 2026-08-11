@@ -2,9 +2,14 @@
 #include "config.hpp"
 #include <SPI.h>
 
+#include "system.hpp"
 #include "led.hpp"
 #include "gps.hpp"
 #include "lora.hpp"
+
+void setup() {
+    System::begin();
+    Led::begin();
 
 void setup() {
     Serial.begin(Config::BAUD_RATE);
@@ -17,6 +22,7 @@ void setup() {
 }
 
 void loop() {
+    System::update();
     Gps::update();
     Led::update();
 
