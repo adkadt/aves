@@ -92,7 +92,7 @@ void LoRa::update() {
         transmissionPending = false;
 
         lastTransmitTime = millis();
-        System::setEvent(System::Event::LORA_TRANSMITTED);
+        System::setEvent(System::Event::LORA_TRANSMIT_FINISHED);
         startReceive();
     }
 
@@ -107,7 +107,7 @@ void LoRa::update() {
     // get size of packet
     size_t length = radio.getPacketLength();
     if (length > Config::LORA_MAX_PACKET_LENGTH) {
-        System::setError(System::Error::LORA_PACKET_TOO_LARGE);
+        System::setEvent(System::Event::LORA_PACKET_TOO_LARGE);
         Serial.println("LoRa packet too long");
         startReceive();
         return;
@@ -117,7 +117,7 @@ void LoRa::update() {
     uint8_t buffer[Config::LORA_MAX_PACKET_LENGTH];
     if (radio.readData(buffer, length) != RADIOLIB_ERR_NONE) {
         Serial.println("LoRa packet read failed");
-        System::setError(System::Error::LORA_RECEIVE_FAILED);
+        System::setEvent(System::Event::LORA_RECEIVE_FAILED);
         startReceive();
         return;
     }
@@ -130,7 +130,7 @@ void LoRa::update() {
         lastReceiveTime = millis();
         System::setEvent(System::Event::LORA_RECEIVED);
     } else {
-        System::setError(System::Error::LORA_PACKET_INVALID);
+        System::setEvent(System::Event::LORA_PACKET_INVALID);
         Serial.println("LoRa packet decode failed");
     }
     
@@ -168,14 +168,14 @@ bool LoRa::transmit(const Packet& packet) {
     
     int16_t state = radio.startTransmit(buffer, length);
     if (state != RADIOLIB_ERR_NONE) {
-        System::setError(System::Error::LORA_TRANSMIT_FAILED);
+        System::setEvent(System::Event::LORA_TRANSMIT_FAILED);
         Serial.print("LoRa transmit failed: ");
         Serial.println(state);
         return false;
     }
         
     transmissionPending = true;
-    System::setEvent(System::Event::LORA_TRANSMITTING);
+    System::setEvent(System::Event::LORA_TRANSMIT_STARTED);
     Serial.println("LoRa packet transmitting");
 
     return true;
@@ -252,11 +252,16 @@ namespace {
 
         if (state != RADIOLIB_ERR_NONE) {
             loraStatus = LoRa::Status::DISCONNECTED;
-            System::setError(System::Error::LORA_RECEIVE_FAILED);
-
+            System::setError(System::Error::LORA_DISCONNECTED);
+            System::setEvent(System::Event::LORA_RECEIVE_FAILED);
             Serial.print("LoRa receive start failed: ");
             Serial.println(state);
             return false;
+        } else if (state == RADIOLIB_ERR_NONE) {
+            if (loraStatus == LoRa::Status::DISCONNECTED) {
+                System::clearError(System::Error::LORA_DISCONNECTED);
+            }
+            loraStatus = LoRa::Status::READY;
         }
 
         return true;

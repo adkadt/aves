@@ -21,38 +21,50 @@ namespace System {
     };
 
     // Errors
-    enum class Error {
-        NONE,
+    enum class Error : uint8_t {
+        NONE = 0,
 
         // GPS
         GPS_DISCONNECTED,
-        GPS_TIMEOUT,
-
+        
         // LoRa
-        LORA_DISCONNECTED,
-        LORA_RECEIVE_FAILED,
-        LORA_TRANSMIT_FAILED,
-        LORA_PACKET_TOO_LARGE
+        LORA_DISCONNECTED,        
+
+        // Battery
+        BATTERY_CRITICAL
     };
-
-    // Events
-    enum class Event : uint32_t {
+    
+    // Warnings
+    enum class Warning : uint8_t {
         NONE = 0,
-
+        
+        // GPS
+        GPS_WEAK_SIGNAL,
+        
         // LoRa
-        LORA_TRANSMITTING,
-        LORA_TRANSMITTED,
+        LORA_WEAK_SIGNAL,
+        
+        // Battery
+        BATTERY_LOW
+    };
+    
+    // Events
+    enum class Event : uint8_t {
+        NONE = 0,
+        
+        // LoRa
+        LORA_TRANSMIT_STARTED,
+        LORA_TRANSMIT_FINISHED,
+        LORA_TRANSMIT_FAILED,
         LORA_RECEIVED,
+        LORA_RECEIVE_FAILED,
         LORA_PACKET_INVALID,
         LORA_PACKET_TOO_LARGE,
-
+        
         // GPS
         GPS_LOCKED,
         GPS_LOST,
-
-        // Battery
-        BATTERY_LOW,
-        BATTERY_CRITICAL
+        GPS_TIMEOUT,
     };
 
     // Modes
@@ -67,10 +79,14 @@ namespace System {
     State getPreviousState();
 
     // Errors
-    Error getError();
     void setError(Error error);
-    bool errorChanged();
-    Error getPreviousError();
+    void clearError(Error error);
+    bool hasError(Error error);
+
+    // Warnings
+    void setWarning(Warning warning);
+    void clearWarning(Warning warning);
+    bool hasWarning(Warning warning);
 
     // Events
     void setEvent(Event event);

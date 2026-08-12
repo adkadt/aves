@@ -3,9 +3,12 @@
 #include <HardwareSerial.h>
 #include <TinyGPS++.h>
 
+#include "system.hpp"
+
 namespace {
     // GPS Status
     Gps::Status gpsStatus;
+    Gps::Status previousStatus;
 
     // driver state
     HardwareSerial gpsSerial(1);
@@ -71,6 +74,8 @@ const Gps::Data& Gps::getData() {
 
 namespace {
     void updateStatus() {
+        Gps::Status previousStatus = gpsStatus;
+
         if (isConnected() && hasLocation()) {
             gpsStatus = Gps::Status::LOCKED;
         } else if (isConnected()) {
@@ -78,9 +83,28 @@ namespace {
         } else {
             gpsStatus = Gps::Status::DISCONNECTED;
         }
+
+        if (previousStatus != gpsStatus) {
+            if (gpsStatus == Gps::Status::LOCKED) {
+                System::setEvent(System::Event::GPS_LOCKED);
+            } else if (previousStatus == Gps::Status::LOCKED) {
+                System::setEvent(System::Event::GPS_LOST);
+            }
+
+            if (gpsStatus == Gps::Status::DISCONNECTED) {
+                System::setError(System::Error::GPS_DISCONNECTED);
+                System::setEvent(System::Event::GPS_TIMEOUT);
+            } else if (previousStatus == Gps::Status::DISCONNECTED) {
+                System::clearError(System::Error::GPS_DISCONNECTED);
+            }
+        }
     }
 
     bool isConnected() {
+        return gps.charsProcessed() > 0 && (millis() - lastUpdate < Config::GPS_TIMEOUT_MS);
+    }
+
+    bool hasFix() {
         return hasReceivedData && (millis() - lastUpdate < Config::GPS_TIMEOUT_MS);
     }
     

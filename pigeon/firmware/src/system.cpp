@@ -3,6 +3,8 @@
 
 namespace {
     System::Mode readModeSwitch();
+    uint32_t errorMask(System::Error error);
+    uint32_t warningMask(System::Warning warning);
     uint32_t eventMask(System::Event event);
 
     System::Mode lastMode = System::Mode::FLIGHT;
@@ -12,9 +14,11 @@ namespace {
     System::State currentState = System::State::STARTUP;
     System::State nextState = System::State::STARTUP;
     
-    System::Error lastError = System::Error::NONE;
-    System::Error currentError = System::Error::NONE;
-    System::Error nextError = System::Error::NONE;
+    uint32_t currentErrors = 0;
+    uint32_t nextErrors = 0;
+
+    uint32_t currentWarnings = 0;
+    uint32_t nextWarnings = 0;
 
     uint32_t currentEvents = 0;
     uint32_t nextEvents = 0;
@@ -31,9 +35,16 @@ void System::begin() {
     nextState = State::STARTUP;
 
     // Error
-    lastError = System::Error::NONE;
-    currentError = System::Error::NONE;
-    nextError = System::Error::NONE;
+    currentErrors = 0;
+    nextErrors = 0;
+
+    // Warnings
+    currentWarnings = 0;
+    nextWarnings = 0;
+
+    // Event
+    currentEvents = 0;
+    nextEvents = 0;
 }
 
 
@@ -43,9 +54,10 @@ void System::update() {
 
     lastState = currentState;
     currentState = nextState;
-    
-    lastError = currentError;
-    currentError = nextError;
+
+    currentErrors = nextErrors;
+
+    currentWarnings = nextWarnings;
 
     currentEvents = nextEvents;
     nextEvents = 0;
@@ -73,9 +85,6 @@ System::State System::getState() {
 
 void System::setState(System::State state) {
     nextState = state;
-
-    if (nextState != System::State::ERROR)
-        System::setError(System::Error::NONE);
 }
 
 bool System::stateChanged() {
@@ -88,29 +97,35 @@ System::State System::getPreviousState() {
 
 
 // Error Functions 
-System::Error System::getError() {
-    return currentError;
-}
-
 void System::setError(System::Error error) {
-    nextError = error;
-
-    if (nextError != System::Error::NONE)
-        System::setState(System::State::ERROR);
+    nextErrors |= errorMask(error);
+    System::setState(System::State::ERROR);
 }
 
-bool System::errorChanged() {
-    return lastError != currentError;
+void System::clearError(System::Error error) {
+    nextErrors &= ~errorMask(error);
 }
 
-System::Error System::getPreviousError() {
-    return lastError;
+bool System::hasError(System::Error error) {
+    return (currentErrors & errorMask(error)) != 0;
+}
+
+
+// Warning Functions
+void System::setWarning(System::Warning warning) {
+    nextWarnings |= warningMask(warning);
+}
+
+void System::clearWarning(System::Warning warning) {
+    nextWarnings &= ~warningMask(warning);
+}
+
+bool System::hasWarning(System::Warning warning) {
+    return (currentWarnings & warningMask(warning)) != 0;
 }
 
 
 // Event Functions
-
-
 void System::setEvent(System::Event event) {
     nextEvents |= eventMask(event);
 }
@@ -125,6 +140,20 @@ namespace {
     System::Mode readModeSwitch() {
         // eventually add mode switch reading.
         return System::Mode::FLIGHT;
+    }
+
+    uint32_t errorMask(System::Error error) {
+        if (error == System::Error::NONE)
+        return 0;
+        
+        return 1u << (static_cast<uint8_t>(error) - 1);
+    }
+    
+    uint32_t warningMask(System::Warning warning) {
+        if (warning == System::Warning::NONE)
+        return 0;
+        
+        return 1u << (static_cast<uint8_t>(warning) - 1);
     }
 
     uint32_t eventMask(System::Event event) {
