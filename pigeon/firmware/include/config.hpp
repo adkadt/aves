@@ -32,27 +32,39 @@ namespace Config {
     constexpr uint32_t BAUD_RATE = 115200;
     
     // GPS Config
-    constexpr uint32_t GPS_BAUD_RATE = 9600;
-    constexpr uint32_t GPS_TIMEOUT_MS = 3000;
-
-    constexpr double GPS_MIN_ALPHA = 0.1;
-    constexpr double GPS_MAX_ALPHA = 0.8;
-    constexpr float GPS_MAX_SPEED = 50.0f;
+    namespace GPS {
+        constexpr uint32_t BAUD_RATE = 9600;
+        constexpr uint32_t TIMEOUT_MS = 3000;
+    
+        constexpr double MIN_ALPHA = 0.1;
+        constexpr double MAX_ALPHA = 0.8;
+        constexpr float MAX_SPEED = 50.0f;
+    }
 
     // LoRa Config
-    constexpr uint8_t LORA_MAX_PAYLOAD_LENGTH = 64;
-    constexpr uint8_t LORA_PACKET_HEADER_LENGTH = 5; // this value is based on code [don't change]
-    constexpr uint8_t LORA_MAX_PACKET_LENGTH = LORA_MAX_PAYLOAD_LENGTH + LORA_PACKET_HEADER_LENGTH;
+    namespace LoRa {
+        constexpr uint8_t MAX_PAYLOAD_LENGTH = 64;
+        constexpr uint8_t PACKET_HEADER_LENGTH = 5; // this value is based on code [don't change]
+        constexpr uint8_t MAX_PACKET_LENGTH = LoRa::MAX_PAYLOAD_LENGTH + LoRa::PACKET_HEADER_LENGTH;
+    
+        // LoRa Radio
+        constexpr float FREQUENCY = 915.0;
+        constexpr float BANDWIDTH = 125.0;
+        constexpr uint8_t SPREADING_FACTOR = 9;
+        constexpr uint8_t CODING_RATE = 7;
+        constexpr uint8_t SYNC_WORD = 0x12;
+        constexpr int8_t TX_POWER = 10;
+        constexpr uint8_t PREAMBLE_LENGTH = 8;
+        constexpr uint8_t GAIN = 0;
+    } 
 
-    // LoRa Radio
-    constexpr float LORA_FREQUENCY = 915.0;
-    constexpr float LORA_BANDWIDTH = 125.0;
-    constexpr uint8_t LORA_SPREADING_FACTOR = 9;
-    constexpr uint8_t LORA_CODING_RATE = 7;
-    constexpr uint8_t LORA_SYNC_WORD = 0x12;
-    constexpr int8_t LORA_TX_POWER = 10;
-    constexpr uint8_t LORA_PREAMBLE_LENGTH = 8;
-    constexpr uint8_t LORA_GAIN = 0;
+    // Battery
+    namespace Battery {
+        constexpr float HIGH_VOLTAGE = 4.2f;
+        constexpr float MEDIUM_VOLTAGE = 4.0f;
+        constexpr float LOW_VOLTAGE = 3.8f;
+        constexpr float CRITICAL_VOLTAGE = 3.6f;
+    }
 }
 
 #endif

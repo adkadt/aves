@@ -27,7 +27,7 @@ namespace LoRa {
         
         uint8_t sequenceNumber;
         uint8_t length;
-        uint8_t payload[Config::LORA_MAX_PAYLOAD_LENGTH];
+        uint8_t payload[Config::LoRa::MAX_PAYLOAD_LENGTH];
 
         float rssi;
         float snr;

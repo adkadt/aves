@@ -38,7 +38,7 @@ void Gps::begin() {
     gpsStatus = Gps::Status::DISCONNECTED;
 
     gpsSerial.begin(
-        Config::GPS_BAUD_RATE, 
+        Config::GPS::BAUD_RATE, 
         SERIAL_8N1, 
         Pins::GPS_TX,
             Pins::GPS_RX
@@ -101,15 +101,15 @@ namespace {
     }
 
     bool isConnected() {
-        return gps.charsProcessed() > 0 && (millis() - lastUpdate < Config::GPS_TIMEOUT_MS);
+        return gps.charsProcessed() > 0 && (millis() - lastUpdate < Config::GPS::TIMEOUT_MS);
     }
 
     bool hasFix() {
-        return hasReceivedData && (millis() - lastUpdate < Config::GPS_TIMEOUT_MS);
+        return hasReceivedData && (millis() - lastUpdate < Config::GPS::TIMEOUT_MS);
     }
     
     bool hasLocation() {
-        return gps.location.isValid() && gps.location.age() < Config::GPS_TIMEOUT_MS;
+        return gps.location.isValid() && gps.location.age() < Config::GPS::TIMEOUT_MS;
     }
 
     void updatePosition() {
@@ -178,8 +178,8 @@ namespace {
     }
 
     double calculatePositionAlpha(float speed) {
-        float t = speed / Config::GPS_MAX_SPEED;
+        float t = speed / Config::GPS::MAX_SPEED;
         t = std::min(std::max(t, 0.0f), 1.0f);
-        return Config::GPS_MIN_ALPHA + t * (Config::GPS_MAX_ALPHA - Config::GPS_MIN_ALPHA);
+        return Config::GPS::MIN_ALPHA + t * (Config::GPS::MAX_ALPHA - Config::GPS::MIN_ALPHA);
     }
 }

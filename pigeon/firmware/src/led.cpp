@@ -32,8 +32,6 @@ namespace {
     constexpr uint32_t COLOR_LORA_TX = 0x00BFFFu; // cyan
     constexpr uint32_t COLOR_LORA_RX = 0xFF8000u; // orange
     
-
-
     enum class Pattern {
         NONE,
         SOLID,

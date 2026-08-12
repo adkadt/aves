@@ -58,14 +58,14 @@ namespace {
 void LoRa::begin() {
     int16_t state;
     state = radio.begin(
-        Config::LORA_FREQUENCY,
-        Config::LORA_BANDWIDTH,
-        Config::LORA_SPREADING_FACTOR,
-        Config::LORA_CODING_RATE,
-        Config::LORA_SYNC_WORD,
-        Config::LORA_TX_POWER,
-        Config::LORA_PREAMBLE_LENGTH,
-        Config::LORA_GAIN
+        Config::LoRa::FREQUENCY,
+        Config::LoRa::BANDWIDTH,
+        Config::LoRa::SPREADING_FACTOR,
+        Config::LoRa::CODING_RATE,
+        Config::LoRa::SYNC_WORD,
+        Config::LoRa::TX_POWER,
+        Config::LoRa::PREAMBLE_LENGTH,
+        Config::LoRa::GAIN
     );
     
     // show failed init
@@ -107,7 +107,7 @@ void LoRa::update() {
             
             // get size of packet
             size_t length = radio.getPacketLength();
-            if (length > Config::LORA_MAX_PACKET_LENGTH) {
+            if (length > Config::LoRa::MAX_PACKET_LENGTH) {
                 System::setEvent(System::Event::LORA_PACKET_TOO_LARGE);
                 Serial.println("LoRa packet too long");
                 startReceive();
@@ -115,7 +115,7 @@ void LoRa::update() {
             }
                 
             // receive packet
-            uint8_t buffer[Config::LORA_MAX_PACKET_LENGTH];
+            uint8_t buffer[Config::LoRa::MAX_PACKET_LENGTH];
             if (radio.readData(buffer, length) != RADIOLIB_ERR_NONE) {
                 Serial.println("LoRa packet read failed");
                 System::setEvent(System::Event::LORA_RECEIVE_FAILED);
@@ -161,7 +161,7 @@ bool LoRa::transmit(const Packet& packet) {
     if (transmissionPending)
         return false;
         
-    uint8_t buffer[Config::LORA_MAX_PACKET_LENGTH];
+    uint8_t buffer[Config::LoRa::MAX_PACKET_LENGTH];
     uint8_t length;
     
     if (!encodePacket(packet, buffer, length)) {
@@ -202,8 +202,8 @@ LoRa::Packet LoRa::createPacket(
 
     packet.sequenceNumber = nextSequenceNumber++;
     
-    if (length > Config::LORA_MAX_PAYLOAD_LENGTH) {
-        length = Config::LORA_MAX_PAYLOAD_LENGTH;
+    if (length > Config::LoRa::MAX_PAYLOAD_LENGTH) {
+        length = Config::LoRa::MAX_PAYLOAD_LENGTH;
     }
     packet.length = length;
 
@@ -276,10 +276,10 @@ namespace {
         uint8_t* buffer,
         uint8_t& length
     ) {
-        if (packet.length > Config::LORA_MAX_PAYLOAD_LENGTH)
+        if (packet.length > Config::LoRa::MAX_PAYLOAD_LENGTH)
             return false;
 
-        length = Config::LORA_PACKET_HEADER_LENGTH + packet.length;
+        length = Config::LoRa::PACKET_HEADER_LENGTH + packet.length;
 
         buffer[0] = packet.destination;
         buffer[1] = packet.source;
@@ -288,7 +288,7 @@ namespace {
         buffer[4] = packet.length;
 
         if (packet.length > 0) {
-            memcpy(buffer + Config::LORA_PACKET_HEADER_LENGTH, packet.payload, packet.length);
+            memcpy(buffer + Config::LoRa::PACKET_HEADER_LENGTH, packet.payload, packet.length);
         }
 
         return true;
@@ -300,17 +300,17 @@ namespace {
         uint8_t length
     ) {
         // check if packet is shorter than minimum header length
-        if (length < Config::LORA_PACKET_HEADER_LENGTH)
+        if (length < Config::LoRa::PACKET_HEADER_LENGTH)
             return false;
 
         uint8_t payloadLength = buffer[4];
 
         // check if payload is bigger than payload length
-        if (payloadLength > Config::LORA_MAX_PAYLOAD_LENGTH)
+        if (payloadLength > Config::LoRa::MAX_PAYLOAD_LENGTH)
             return false;
 
         // check if packet is equal to the expected packet length
-        if (length != Config::LORA_PACKET_HEADER_LENGTH + payloadLength)
+        if (length != Config::LoRa::PACKET_HEADER_LENGTH + payloadLength)
             return false;
 
         packet.destination = buffer[0];
@@ -320,7 +320,7 @@ namespace {
         packet.length = buffer[4];
 
         if (payloadLength > 0) {
-            memcpy(packet.payload, buffer + Config::LORA_PACKET_HEADER_LENGTH, payloadLength);
+            memcpy(packet.payload, buffer + Config::LoRa::PACKET_HEADER_LENGTH, payloadLength);
         }
 
         return true;
