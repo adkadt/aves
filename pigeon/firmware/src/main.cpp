@@ -1,95 +1,120 @@
 #include <Arduino.h>
-#include "config.hpp"
 #include <SPI.h>
 
+#include "config.hpp"
+
 #include "system/system.hpp"
+#include "modes/modes.hpp"
 
 #include "hardware/led.hpp"
 #include "hardware/buzzer.hpp"
 #include "hardware/gps.hpp"
 #include "hardware/lora.hpp"
+#include "hardware/battery.hpp"
+
+void updateSystemState();
+void updateMode();
 
 void setup() {
     System::begin();
     Led::begin();
     Buzzer::begin();
-
+    
     Serial.begin(Config::BAUD_RATE);
     SPI.begin(Pins::LORA_SCK, Pins::LORA_MISO, Pins::LORA_MOSI);
     
+    Battery::begin();
     Gps::begin();
-    // LoRa::begin();
+    LoRa::begin();
 }
 
 
 
 void loop() {
+    // update all systems
     System::update();
     Led::update();
     Buzzer::update();
-
+    
+    Battery::update();
     Gps::update();
+    LoRa::update();
 
-    static uint32_t lastPrint = 0;
+    // updated overall system state
+    updateSystemState();
 
-    if (millis() - lastPrint >= 1000)
-    {
-        lastPrint = millis();
+    // run mode loop
+    updateMode();
+}
 
-        Serial.println();
-
-        Serial.print("Connected: ");
-        Serial.println(Gps::isConnected() ? "Yes" : "No");
-
-        Serial.print("Fix: ");
-        Serial.println(Gps::hasFix() ? "Yes" : "No");
-
-        Serial.print("Location: ");
-        Serial.println(Gps::hasLocation() ? "Yes" : "No");
-
-        if (!Gps::hasLocation())
-            System::setState(System::State::GPS_SEARCHING);
-        else
+void updateSystemState() {
+    switch (Gps::getStatus()) {
+        case Gps::Status::DISCONNECTED:
+            System::setError(System::Error::GPS_DISCONNECTED);
+            break;
+        case Gps::Status::LOCKED:
             System::setState(System::State::GPS_LOCK);
+            break;
+        case Gps::Status::SEARCHING:
+            System::setState(System::State::GPS_SEARCHING);
+            break;
+        default:
+            break;
+    }
 
-        if (Gps::isConnected())
-        {
-            const Gps::Data& data = Gps::getData();
+    switch (LoRa::getStatus()) {
+        case LoRa::Status::DISCONNECTED:
+            System::setError(System::Error::LORA_DISCONNECTED);
+            break;
+        default:
+            break;
+    }
 
-            Serial.print("Latitude: ");
-            Serial.println(data.position.latitude, 6);
+    switch (Battery::getStatus()) {
+        case Battery::Status::CRITICAL_VOLTAGE:
+            System::setError(System::Error::BATTERY_CRITICAL);
+            break;
+        case Battery::Status::LOW_VOLTAGE:
+            System::setWarning(System::Warning::BATTERY_LOW);
+            break;
+        default:
+            break;
+    }
+}
 
-            Serial.print("Longitude: ");
-            Serial.println(data.position.longitude, 6);
-
-            Serial.print("Altitude: ");
-            Serial.print(data.position.altitude);
-            Serial.println(" m");
-
-            Serial.print("Speed: ");
-            Serial.print(data.speed);
-            Serial.println(" km/h");
-
-            Serial.print("Course: ");
-            Serial.print(data.course);
-            Serial.println(" deg");
-
-            Serial.print("Satellites: ");
-            Serial.println(data.satellites);
-
-            Serial.print("HDOP: ");
-            Serial.println(data.hdop);
-
-            Serial.printf(
-                "UTC: %02u:%02u:%02u %02u/%02u/%04u\n",
-                data.utcTime.hour,
-                data.utcTime.minute,
-                data.utcTime.second,
-                data.utcTime.day,
-                data.utcTime.month,
-                data.utcTime.year
-            );
+void updateMode() {
+    // start mode upon switch
+    if (System::modeChanged()) {
+        switch (System::getMode()) {
+            case System::Mode::FLIGHT:
+                Mode::Flight::begin();
+                break;
+            case System::Mode::GROUND:
+                Mode::Ground::begin();
+                break;
+            case System::Mode::DEBUG:
+                Mode::Debug::begin();
+                break;
+            default:
+                break;
         }
     }
-    
+
+    // run mode loop
+    switch (System::getMode()) {
+        case System::Mode::FLIGHT:
+            Mode::Flight::update();
+            break;
+            
+        case System::Mode::GROUND:
+            Mode::Ground::update();
+            break;
+            
+        case System::Mode::DEBUG:
+            Mode::Debug::update();
+            break;
+        
+        default:
+            break;
+    }
 }

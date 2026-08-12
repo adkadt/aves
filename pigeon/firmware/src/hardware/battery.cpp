@@ -1,6 +1,6 @@
 #include "system/system.hpp"
 #include "config.hpp"
-#include "battery.hpp"
+#include "hardware/battery.hpp"
 
 #include <Arduino.h>
 
