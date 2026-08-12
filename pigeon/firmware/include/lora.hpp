@@ -1,20 +1,15 @@
-#ifndef LORA_HPP
-#define LORA_HPP
+#pragma once
 
 #include <cstdint>
 #include "config.hpp"
 
 namespace LoRa {
 
-    struct Packet {
-        uint8_t destination;
-        uint8_t source;
-        uint8_t type;
-        uint8_t payload[Config::LORA_MAX_PAYLOAD_LENGTH];
-        int16_t rssi;
-        int8_t snr;
+    enum class Status {
+        DISCONNECTED,
+        READY
     };
-
+    
     enum class PacketType : uint8_t {
         HEARTBEAT,
         GPS,
@@ -25,16 +20,34 @@ namespace LoRa {
         ERROR
     };
 
+    struct Packet {
+        uint8_t destination;
+        uint8_t source;
+        PacketType type;
+        
+        uint8_t sequenceNumber;
+        uint8_t length;
+        uint8_t payload[Config::LORA_MAX_PAYLOAD_LENGTH];
+
+        float rssi;
+        float snr;
+    };
+
+    // default functions
     void begin();
     void update();
 
-    bool connected();
-
-    bool available();
-    bool send(const Packet& packet);
+    // Status
+    Status getStatus();
+    
+    // Reveiving
     bool receive(Packet& packet);
+    
+    // Transmitting
+    bool transmit(const Packet& packet);
 
-    Packet LoRa::createPacket(
+    // Packet Contruction
+    Packet createPacket(
         uint8_t destination, 
         uint8_t source, 
         PacketType type, 
@@ -42,6 +55,11 @@ namespace LoRa {
         uint8_t length
     );
 
-}
+    // Radio Activity Data
+    float getRSSI();
+    float getSNR();
+    uint32_t getLastReceiveTime();
+    uint32_t getLastTransmitTime();
 
-#endif // LORA_HPP
+    const char* packetTypeName(LoRa::PacketType type);
+}

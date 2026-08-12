@@ -20,7 +20,7 @@ namespace Pins {
     constexpr uint8_t LORA_CS = 8;
     constexpr uint8_t LORA_RST = 7;
     constexpr uint8_t LORA_DIO0 = 12; // G0, IRQ/ DIO0
-    
+
     // Misc
     constexpr uint8_t VBAT_SENSE = 1;
     constexpr uint8_t BUZZER = 6;
@@ -33,14 +33,26 @@ namespace Config {
     
     // GPS Config
     constexpr uint32_t GPS_BAUD_RATE = 9600;
-    constexpr uint32_t GPS_TIMEOUT_MS = 1000;
+    constexpr uint32_t GPS_TIMEOUT_MS = 3000;
 
     constexpr double GPS_MIN_ALPHA = 0.1;
     constexpr double GPS_MAX_ALPHA = 0.8;
     constexpr float GPS_MAX_SPEED = 50.0f;
 
     // LoRa Config
-    constexpr uint8_t LORA_MAX_PAYLOAD_LENGTH = 255;
+    constexpr uint8_t LORA_MAX_PAYLOAD_LENGTH = 64;
+    constexpr uint8_t LORA_PACKET_HEADER_LENGTH = 5; // this value is based on code [don't change]
+    constexpr uint8_t LORA_MAX_PACKET_LENGTH = LORA_MAX_PAYLOAD_LENGTH + LORA_PACKET_HEADER_LENGTH;
+
+    // LoRa Radio
+    constexpr float LORA_FREQUENCY = 915.0;
+    constexpr float LORA_BANDWIDTH = 125.0;
+    constexpr uint8_t LORA_SPREADING_FACTOR = 9;
+    constexpr uint8_t LORA_CODING_RATE = 7;
+    constexpr uint8_t LORA_SYNC_WORD = 0x12;
+    constexpr int8_t LORA_TX_POWER = 10;
+    constexpr uint8_t LORA_PREAMBLE_LENGTH = 8;
+    constexpr uint8_t LORA_GAIN = 0;
 }
 
 #endif
