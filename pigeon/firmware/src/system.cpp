@@ -1,4 +1,7 @@
 #include "system.hpp"
+#include "config.hpp"
+
+#include <Arduino.h>
 #include <cstdint>
 
 namespace {
@@ -7,8 +10,8 @@ namespace {
     uint32_t warningMask(System::Warning warning);
     uint32_t eventMask(System::Event event);
 
-    System::Mode lastMode = System::Mode::FLIGHT;
-    System::Mode currentMode = System::Mode::FLIGHT;
+    System::Mode lastMode = Config::PRIMARY_MODE;
+    System::Mode currentMode = Config::SECONDARY_MODE;
     
     System::State lastState = System::State::OFF;
     System::State currentState = System::State::STARTUP;
@@ -25,6 +28,8 @@ namespace {
 }
 
 void System::begin() {
+    pinMode(Pins::MODE_SWITCH, INPUT);
+
     // Mode
     lastMode = readModeSwitch();
     currentMode = lastMode;
@@ -150,8 +155,10 @@ bool System::hasEvent() {
 // private implementation
 namespace {
     System::Mode readModeSwitch() {
-        // eventually add mode switch reading.
-        return System::Mode::FLIGHT;
+        if (digitalRead(Pins::MODE_SWITCH) == HIGH)
+            return Config::PRIMARY_MODE;
+        else
+            return Config::SECONDARY_MODE;
     }
 
     uint32_t errorMask(System::Error error) {

@@ -119,6 +119,16 @@ namespace {
 
                 noTone(Pins::BUZZER);
                 break;
+
+            case System::Mode::DEBUG:
+                tone(Pins::BUZZER, 523, 200);   // C5
+                delay(400);
+
+                tone(Pins::BUZZER, 523, 200);   // C5
+                delay(400);
+
+                noTone(Pins::BUZZER);
+                break;
             
             default:
                 break;

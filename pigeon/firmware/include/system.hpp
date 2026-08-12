@@ -9,7 +9,8 @@ namespace System {
     // Modes
     enum class Mode {
         FLIGHT,
-        GROUND
+        GROUND,
+        DEBUG
     };
 
     // States

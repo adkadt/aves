@@ -2,6 +2,7 @@
 #define CONFIG_HPP
 
 #include <cstdint>
+#include "system.hpp"
 
 namespace Pins {
     // LED
@@ -28,6 +29,9 @@ namespace Pins {
 }
 
 namespace Config {
+    constexpr System::Mode PRIMARY_MODE = System::Mode::FLIGHT;
+    constexpr System::Mode SECONDARY_MODE = System::Mode::GROUND;
+
     // Serial Config
     constexpr uint32_t BAUD_RATE = 115200;
     
