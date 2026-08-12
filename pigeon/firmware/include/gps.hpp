@@ -6,6 +6,12 @@
 
 namespace Gps {
 
+    enum class Status {
+        DISCONNECTED,
+        SEARCHING,
+        LOCKED
+    };
+
     struct Position {
         double latitude;
         double longitude;
@@ -27,11 +33,8 @@ namespace Gps {
 
     void begin();
     void update();
-    
-    bool hasFix();
-    bool isConnected();
-    bool hasLocation();
 
+    Status getStatus();
     const Data& getData();
 }
 

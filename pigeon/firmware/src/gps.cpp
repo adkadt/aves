@@ -4,6 +4,9 @@
 #include <TinyGPS++.h>
 
 namespace {
+    // GPS Status
+    Gps::Status gpsStatus;
+
     // driver state
     HardwareSerial gpsSerial(1);
     TinyGPSPlus gps;
@@ -14,21 +17,28 @@ namespace {
     bool filterInitialized = false;
 
     // helpers
+    void updateStatus();
     void updatePosition();
     void updateMotion();
-    void updateStatus();
     void updateTime();
+    void updateMetrics();
+
+    bool hasFix();
+    bool isConnected();
+    bool hasLocation();
 
     void applyEma(Gps::Position& filtered, const Gps::Position& measurement, double alpha);
     double calculatePositionAlpha(float speed);
 }
 
 void Gps::begin() {
+    gpsStatus = Gps::Status::DISCONNECTED;
+
     gpsSerial.begin(
         Config::GPS_BAUD_RATE, 
         SERIAL_8N1, 
-        Pins::GPS_RX, 
-        Pins::GPS_TX
+        Pins::GPS_TX,
+            Pins::GPS_RX
     );
 }
 
@@ -37,36 +47,47 @@ void Gps::update() {
         if (!gps.encode(gpsSerial.read()))
             continue;
 
-        updatePosition();
         updateMotion();
-        updateStatus();
+        updatePosition();
+        updateMetrics();
         updateTime();
         
         // bookkeeping
         lastUpdate = millis();
         hasReceivedData = true;
-        
     }
+
+    updateStatus();
 }
 
-bool Gps::hasFix() {
-    return gps.location.isValid();
+Gps::Status Gps::getStatus() {
+    return gpsStatus;
 }
-
-bool Gps::isConnected() {
-    return hasReceivedData && (millis() - lastUpdate < Config::GPS_TIMEOUT_MS);
-}
-
-bool Gps::hasLocation() {
-    return gps.location.isValid() && gps.location.age() < Config::GPS_TIMEOUT_MS;
-}
-
 
 const Gps::Data& Gps::getData() {
     return gpsData;
 }
 
+
 namespace {
+    void updateStatus() {
+        if (isConnected() && hasLocation()) {
+            gpsStatus = Gps::Status::LOCKED;
+        } else if (isConnected()) {
+            gpsStatus = Gps::Status::SEARCHING;
+        } else {
+            gpsStatus = Gps::Status::DISCONNECTED;
+        }
+    }
+
+    bool isConnected() {
+        return hasReceivedData && (millis() - lastUpdate < Config::GPS_TIMEOUT_MS);
+    }
+    
+    bool hasLocation() {
+        return gps.location.isValid() && gps.location.age() < Config::GPS_TIMEOUT_MS;
+    }
+
     void updatePosition() {
         if (!gps.location.isUpdated())
             return;
@@ -95,7 +116,7 @@ namespace {
             gpsData.course = gps.course.deg();
     }
 
-    void updateStatus() {
+    void updateMetrics() {
         if (gps.satellites.isValid())
             gpsData.satellites = gps.satellites.value();
 
