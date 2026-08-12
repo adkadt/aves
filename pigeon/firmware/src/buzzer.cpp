@@ -5,6 +5,8 @@
 #include "config.hpp"
 
 namespace {
+    void playStartup();
+
     struct BuzzerNote {
         uint16_t frequency;
         uint16_t duration;
@@ -30,8 +32,15 @@ namespace {
 
 namespace {
     const BuzzerNote gpsLockNotes[] = {
-        {1047, 100},
-        {1319, 150}
+        { 880, 120 },
+        {   0,  60 },
+        { 1175, 220 },
+    };
+
+    const BuzzerNote gpsLostNotes[] = {
+        { 1175, 220 },
+        { 0,     80 },
+        { 700,  300 },
     };
 }
 
@@ -41,6 +50,7 @@ void Buzzer::begin() {
     noTone(Pins::BUZZER);
 
     buzzerPlayer.stop();
+    playStartup();
 }
 
 
@@ -54,8 +64,14 @@ void Buzzer::update() {
     
     // start buzzer sequence
     if (System::stateChanged()) {
+        System::State previousState = System::getPreviousState();
+
         // startSequence
         switch (System::getState()) {
+            case System::State::GPS_SEARCHING:
+                if (previousState == System::State::GPS_LOCK)
+                    buzzerPlayer.play(gpsLostNotes);
+                break;
             case System::State::GPS_LOCK:
                 buzzerPlayer.play(gpsLockNotes);
                 break;
