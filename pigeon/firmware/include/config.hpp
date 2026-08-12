@@ -36,6 +36,7 @@ namespace Config {
         constexpr uint32_t BAUD_RATE = 9600;
         constexpr uint32_t TIMEOUT_MS = 3000;
     
+        // EMA
         constexpr double MIN_ALPHA = 0.1;
         constexpr double MAX_ALPHA = 0.8;
         constexpr float MAX_SPEED = 50.0f;
@@ -60,10 +61,20 @@ namespace Config {
 
     // Battery
     namespace Battery {
-        constexpr float HIGH_VOLTAGE = 4.2f;
-        constexpr float MEDIUM_VOLTAGE = 4.0f;
-        constexpr float LOW_VOLTAGE = 3.8f;
-        constexpr float CRITICAL_VOLTAGE = 3.6f;
+        // Voltage divider
+        constexpr float DIVIDER_TOP_RESISTOR = 100000.0f;
+        constexpr float DIVIDER_BOTTOM_RESISTOR = 100000.0f;
+        
+        // Sampling
+        constexpr uint32_t SAMPLE_INTERVAL_MS = 100; 
+
+        // Battery Thresholds
+        constexpr float MIN_USB_VOLTAGE = 4.7f;
+        constexpr float LOW_VOLTAGE = 3.7f;
+        constexpr float CRITICAL_VOLTAGE = 3.3f;
+
+        // EMA
+        constexpr float VOLTAGE_FILTER_ALPHA  = 0.3f;
     }
 }
 
