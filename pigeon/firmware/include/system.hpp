@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace System {
     void begin();
     void update();
@@ -82,13 +84,16 @@ namespace System {
     void setError(Error error);
     void clearError(Error error);
     bool hasError(Error error);
+    bool hasError();
 
     // Warnings
     void setWarning(Warning warning);
     void clearWarning(Warning warning);
     bool hasWarning(Warning warning);
+    bool hasWarning();
 
     // Events
     void setEvent(Event event);
     bool hasEvent(Event event);
+    bool hasEvent();
 }

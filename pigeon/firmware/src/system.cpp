@@ -110,6 +110,10 @@ bool System::hasError(System::Error error) {
     return (currentErrors & errorMask(error)) != 0;
 }
 
+bool System::hasError() {
+    return currentErrors != 0;
+}
+
 
 // Warning Functions
 void System::setWarning(System::Warning warning) {
@@ -124,6 +128,10 @@ bool System::hasWarning(System::Warning warning) {
     return (currentWarnings & warningMask(warning)) != 0;
 }
 
+bool System::hasWarning() {
+    return currentWarnings != 0;
+}
+
 
 // Event Functions
 void System::setEvent(System::Event event) {
@@ -132,6 +140,10 @@ void System::setEvent(System::Event event) {
 
 bool System::hasEvent(System::Event event) {
     return (currentEvents & eventMask(event)) != 0;
+}
+
+bool System::hasEvent() {
+    return currentEvents != 0;
 }
 
 
