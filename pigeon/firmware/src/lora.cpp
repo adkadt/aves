@@ -22,19 +22,24 @@ namespace {
     uint32_t lastReceiveTime = 0;
     uint32_t lastTransmitTime = 0;
 
+    enum class Operation {
+        RECEIVE,
+        TRANSMIT
+    };
+
+    Operation currentOperation = Operation::RECEIVE;
+
+    volatile bool radioInterrupt = false;
+    void onRadioInterrupt();
+
     // receiving
     bool startReceive();
-    volatile bool packetReceived = false;
     bool packetAvailable = false;
     LoRa::Packet receivedPacket{};
-    void onPacketReceived();
 
     // transmitting
     uint8_t nextSequenceNumber = 0;
     bool transmissionPending = false;
-    volatile bool packetTransmitted = false;
-    void onPacketSent();
-
 
     // helpers
     bool encodePacket(
@@ -74,8 +79,8 @@ void LoRa::begin() {
     }
 
     // set radio inturupt
-    radio.setPacketReceivedAction(onPacketReceived);
-    radio.setPacketSentAction(onPacketSent);
+    radio.setPacketReceivedAction(onRadioInterrupt);
+    radio.setPacketSentAction(onRadioInterrupt);
     
     if (!startReceive())
     return;
@@ -85,57 +90,55 @@ void LoRa::begin() {
 }
 
 void LoRa::update() {
-    if (packetTransmitted) {
-        Serial.println("LoRa packet transmitted");
-
-        packetTransmitted = false;
-        transmissionPending = false;
-
-        lastTransmitTime = millis();
-        System::setEvent(System::Event::LORA_TRANSMIT_FINISHED);
-        startReceive();
-    }
-
-    // start of receive logic
-    if (!packetReceived)
-        return;
-
-    packetReceived = false;
-    
-    Serial.println("LoRa packet received");
-    
-    // get size of packet
-    size_t length = radio.getPacketLength();
-    if (length > Config::LORA_MAX_PACKET_LENGTH) {
-        System::setEvent(System::Event::LORA_PACKET_TOO_LARGE);
-        Serial.println("LoRa packet too long");
-        startReceive();
-        return;
-    }
+    if (radioInterrupt) {
+        radioInterrupt = false;
         
-    // receive packet
-    uint8_t buffer[Config::LORA_MAX_PACKET_LENGTH];
-    if (radio.readData(buffer, length) != RADIOLIB_ERR_NONE) {
-        Serial.println("LoRa packet read failed");
-        System::setEvent(System::Event::LORA_RECEIVE_FAILED);
-        startReceive();
-        return;
+        if (currentOperation == Operation::TRANSMIT) {
+            Serial.println("LoRa TX complete");
+        
+            // packetTransmitted = false;
+            transmissionPending = false;
+        
+            lastTransmitTime = millis();
+            System::setEvent(System::Event::LORA_TRANSMIT_FINISHED);
+            startReceive();
+        } else {
+            Serial.println("LoRa RX complete");
+            
+            // get size of packet
+            size_t length = radio.getPacketLength();
+            if (length > Config::LORA_MAX_PACKET_LENGTH) {
+                System::setEvent(System::Event::LORA_PACKET_TOO_LARGE);
+                Serial.println("LoRa packet too long");
+                startReceive();
+                return;
+            }
+                
+            // receive packet
+            uint8_t buffer[Config::LORA_MAX_PACKET_LENGTH];
+            if (radio.readData(buffer, length) != RADIOLIB_ERR_NONE) {
+                Serial.println("LoRa packet read failed");
+                System::setEvent(System::Event::LORA_RECEIVE_FAILED);
+                startReceive();
+                return;
+            }
+        
+            if (decodePacket(receivedPacket, buffer, length)) {
+                receivedPacket.rssi = radio.getRSSI();
+                receivedPacket.snr = radio.getSNR();
+        
+                packetAvailable = true;
+                lastReceiveTime = millis();
+                System::setEvent(System::Event::LORA_RECEIVED);
+            } else {
+                System::setEvent(System::Event::LORA_PACKET_INVALID);
+                Serial.println("LoRa packet decode failed");
+            }
+            
+            // restart receive
+            startReceive();
+        }
     }
-
-    if (decodePacket(receivedPacket, buffer, length)) {
-        receivedPacket.rssi = radio.getRSSI();
-        receivedPacket.snr = radio.getSNR();
-
-        packetAvailable = true;
-        lastReceiveTime = millis();
-        System::setEvent(System::Event::LORA_RECEIVED);
-    } else {
-        System::setEvent(System::Event::LORA_PACKET_INVALID);
-        Serial.println("LoRa packet decode failed");
-    }
-    
-    // restart receive
-    startReceive();
 }
 
 LoRa::Status LoRa::getStatus() {
@@ -167,14 +170,17 @@ bool LoRa::transmit(const Packet& packet) {
     }
     
     int16_t state = radio.startTransmit(buffer, length);
+
     if (state != RADIOLIB_ERR_NONE) {
         System::setEvent(System::Event::LORA_TRANSMIT_FAILED);
         Serial.print("LoRa transmit failed: ");
         Serial.println(state);
         return false;
     }
-        
+
+    currentOperation = Operation::TRANSMIT;
     transmissionPending = true;
+        
     System::setEvent(System::Event::LORA_TRANSMIT_STARTED);
     Serial.println("LoRa packet transmitting");
 
@@ -239,12 +245,8 @@ const char* LoRa::packetTypeName(LoRa::PacketType type) {
 }
 
 namespace {
-    void onPacketReceived() {
-        packetReceived = true;
-    }
-
-    void onPacketSent() {
-        packetTransmitted = true;
+    void onRadioInterrupt() {
+        radioInterrupt = true;
     }
 
     bool startReceive() {
@@ -257,13 +259,15 @@ namespace {
             Serial.print("LoRa receive start failed: ");
             Serial.println(state);
             return false;
-        } else if (state == RADIOLIB_ERR_NONE) {
-            if (loraStatus == LoRa::Status::DISCONNECTED) {
-                System::clearError(System::Error::LORA_DISCONNECTED);
-            }
-            loraStatus = LoRa::Status::READY;
         }
 
+        if (loraStatus == LoRa::Status::DISCONNECTED) {
+            System::clearError(System::Error::LORA_DISCONNECTED);
+        }
+     
+        currentOperation = Operation::RECEIVE;
+        loraStatus = LoRa::Status::READY;
+        
         return true;
     }
 

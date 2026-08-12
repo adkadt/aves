@@ -13,24 +13,57 @@ namespace {
     constexpr uint8_t BRIGHTNESS_MAX = 150; // 255
     constexpr uint8_t BRIGHTNESS_MIN = 0; // 0
     
+    // State Colors
     constexpr uint32_t COLOR_STARTUP = 0x0000FFu; // blue
-    constexpr uint32_t COLOR_ERROR = 0xFF0000u; // red
     constexpr uint32_t COLOR_GPS_SEARCHING = 0x00FFFFu; // cyan
     constexpr uint32_t COLOR_GPS_LOCK = 0x00FF00u; // green
     constexpr uint32_t COLOR_TRANSMITTING = 0xFFFF00u; // yellow
     constexpr uint32_t COLOR_OFF = 0x000000u; // black
+    
+    // Error Colors
+    constexpr uint32_t COLOR_ERROR = 0xFF0000u; // red
+    
+    // Warning Colors
+
+    // Event Colors
+    
+
+
+    enum class Pattern {
+        NONE,
+        SOLID,
+        BLINK,
+        PULSE,
+        FLASH,
+        SEQUENCE
+    };
+
+    struct Indication {
+        Pattern pattern;
+        uint32_t color;
+        uint32_t duration;
+    };
 
     struct LedData {
         uint32_t lastUpdate;
         uint32_t lastFadeUpdate;
+
         uint8_t brightness;
         bool fadingUp;
+
+        Indication indication;
+        uint32_t indicationStart;
+        uint32_t indicationDuration;
+        uint32_t indicationColor;
     };
     LedData ledData;
 
     void solid(uint32_t color);
     void blink(uint32_t color);
     void pulse(uint32_t color);
+
+    void flash(uint32_t color, uint32_t duration);
+
 }
 
 void Led::begin() {
@@ -53,6 +86,8 @@ void Led::update() {
         ledData.fadingUp = true;
     }
 
+    bool error_override = false
+
     switch (System::getState()) {
         case System::State::STARTUP:
             ::solid(COLOR_STARTUP);
@@ -67,11 +102,14 @@ void Led::update() {
             ::blink(COLOR_TRANSMITTING);
             break;
         case System::State::ERROR:
-            ::blink(COLOR_ERROR);
+            error_override = true;
             break;
         default:
             ::solid(COLOR_OFF);
             break;
+    }
+
+    if (error_override) {
     }
 }
 
