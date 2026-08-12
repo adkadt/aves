@@ -1,8 +1,8 @@
 #include <Adafruit_NeoPixel.h>
 #include <cstdint>
 
-#include "system.hpp"
-#include "led.hpp"
+#include "system/system.hpp"
+#include "hardware/led.hpp"
 #include "config.hpp"
 
 namespace {

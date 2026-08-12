@@ -1,9 +1,9 @@
-#include "gps.hpp"
+#include "hardware/gps.hpp"
 #include "config.hpp"
 #include <HardwareSerial.h>
 #include <TinyGPS++.h>
 
-#include "system.hpp"
+#include "system/system.hpp"
 
 namespace {
     // GPS Status

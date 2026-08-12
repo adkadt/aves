@@ -2,7 +2,7 @@
 #define CONFIG_HPP
 
 #include <cstdint>
-#include "system.hpp"
+#include "system/system.hpp"
 
 namespace Pins {
     // LED

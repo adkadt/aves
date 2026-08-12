@@ -2,11 +2,12 @@
 #include "config.hpp"
 #include <SPI.h>
 
-#include "system.hpp"
-#include "led.hpp"
-#include "buzzer.hpp"
-#include "gps.hpp"
-#include "lora.hpp"
+#include "system/system.hpp"
+
+#include "hardware/led.hpp"
+#include "hardware/buzzer.hpp"
+#include "hardware/gps.hpp"
+#include "hardware/lora.hpp"
 
 void setup() {
     System::begin();

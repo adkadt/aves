@@ -1,10 +1,10 @@
-#include "lora.hpp"
+#include "hardware/lora.hpp"
 #include "config.h"
 
 #include <RadioLib.h>
 #include <cstring> // Required for memcpy
 
-#include "system.hpp"
+#include "system/system.hpp"
 
 
 namespace {
