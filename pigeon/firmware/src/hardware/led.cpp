@@ -18,7 +18,7 @@ namespace {
     
     // State Colors
     constexpr uint32_t COLOR_STARTUP = 0x0000FFu; // blue
-    constexpr uint32_t COLOR_GPS_SEARCHING = 0x00FFFFu; // cyan
+    constexpr uint32_t COLOR_GPS_SEARCHING = 0x0000FFu; // blue
     constexpr uint32_t COLOR_GPS_LOCK = 0x00FF00u; // green
     constexpr uint32_t COLOR_OFF = 0x000000u; // black
     

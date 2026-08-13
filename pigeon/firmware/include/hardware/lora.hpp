@@ -12,11 +12,10 @@ namespace LoRa {
     
     enum class PacketType : uint8_t {
         HEARTBEAT,
-        GPS,
-        TELEMETRY,
+        GPS_TELEMETRY,
         COMMAND,
-        ACK,
-        DEBUG,
+        RESPONSE,
+        EVENT,
         ERROR
     };
 

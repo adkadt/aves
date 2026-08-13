@@ -152,7 +152,7 @@ bool LoRa::receive(Packet& packet) {
 
     Serial.println("LoRa packet received");
 
-    packet = receivedPacket;
+    memcpy(&packet, &receivedPacket, sizeof(Packet));
     packetAvailable = false;
     return true;
 }
@@ -231,18 +231,15 @@ uint32_t LoRa::getLastTransmitTime() {
 
 }
 
-const char* LoRa::packetTypeName(LoRa::PacketType type) {
-    switch (type) {
-        case LoRa::PacketType::HEARTBEAT: return "HEARTBEAT";
-        case LoRa::PacketType::GPS:       return "GPS";
-        case LoRa::PacketType::TELEMETRY: return "TELEMETRY";
-        case LoRa::PacketType::COMMAND:   return "COMMAND";
-        case LoRa::PacketType::ACK:       return "ACK";
-        case LoRa::PacketType::DEBUG:     return "DEBUG";
-        case LoRa::PacketType::ERROR:     return "ERROR";
-        default:                          return "UNKNOWN";
-    }
-}
+// const char* LoRa::packetTypeName(LoRa::PacketType type) {
+//     switch (type) {
+//         case LoRa::PacketType::HEARTBEAT: return "HEARTBEAT";
+//         case LoRa::PacketType::TELEMETRY: return "TELEMETRY";
+//         case LoRa::PacketType::COMMAND:   return "COMMAND";
+//         case LoRa::PacketType::ERROR:     return "ERROR";
+//         default:                          return "UNKNOWN";
+//     }
+// }
 
 namespace {
     void onRadioInterrupt() {

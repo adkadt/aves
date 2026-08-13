@@ -21,11 +21,32 @@ void setup() {
     Buzzer::begin();
     
     Serial.begin(Config::BAUD_RATE);
+    // while (!Serial) {};
+    Serial.println("Serial initialized");
+
     SPI.begin(Pins::LORA_SCK, Pins::LORA_MISO, Pins::LORA_MOSI);
     
     Battery::begin();
     Gps::begin();
     LoRa::begin();
+
+    // start system mode
+    switch (System::getMode()) {
+        case System::Mode::FLIGHT:
+            Mode::Flight::begin();
+            break;
+
+        case System::Mode::GROUND:
+            Mode::Ground::begin();
+            break;
+
+        case System::Mode::DEBUG:
+            Mode::Debug::begin();
+            break;
+
+        default:
+            break;
+    }
 }
 
 

@@ -42,6 +42,27 @@ namespace {
         { 0,     80 },
         { 700,  300 },
     };
+
+    const BuzzerNote startupFlightNotes[] = {
+        { 523,  90 }, // C5
+        { 784,  90 }, // G5
+        { 1047, 90 }, // C6
+        { 1319, 150}, // E6
+        { 784,  220}, // G5
+    };
+
+    const BuzzerNote startupGroundNotes[] = {
+        { 1047, 120 }, // C6
+        { 784,  120 }, // G5
+        { 1047, 200 }, // C6
+    };
+
+    const BuzzerNote startupDebugNotes[] = {
+        { 523, 200 }, // C5
+        { 0,   200 },
+        { 523, 200 }, // C5
+        { 0,   200 },
+    };
 }
 
 
@@ -89,45 +110,15 @@ namespace {
     void playStartup() {
         switch (System::getMode()) {
             case System::Mode::FLIGHT:
-                tone(Pins::BUZZER, 523);   // C5
-                delay(90);
-
-                tone(Pins::BUZZER, 784);   // G5
-                delay(90);
-
-                tone(Pins::BUZZER, 1047);  // C6
-                delay(90);
-
-                tone(Pins::BUZZER, 1319);  // E6
-                delay(150);
-
-                tone(Pins::BUZZER, 784);   // G5
-                delay(220);
-
-                noTone(Pins::BUZZER);
+                buzzerPlayer.play(startupFlightNotes);
                 break;
 
             case System::Mode::GROUND:
-                tone(Pins::BUZZER, 1047);  // C6
-                delay(120);
-
-                tone(Pins::BUZZER, 784);   // G5
-                delay(120);
-
-                tone(Pins::BUZZER, 1047);  // C6
-                delay(200);
-
-                noTone(Pins::BUZZER);
+                buzzerPlayer.play(startupGroundNotes);
                 break;
 
             case System::Mode::DEBUG:
-                tone(Pins::BUZZER, 523, 200);   // C5
-                delay(400);
-
-                tone(Pins::BUZZER, 523, 200);   // C5
-                delay(400);
-
-                noTone(Pins::BUZZER);
+                buzzerPlayer.play(startupDebugNotes);
                 break;
             
             default:
