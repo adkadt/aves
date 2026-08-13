@@ -30,8 +30,7 @@ namespace {
     bool isConnected();
     bool hasLocation();
 
-    void applyEma(Gps::Position& filtered, const Gps::Position& measurement, double alpha);
-    double calculatePositionAlpha(float speed);
+    void applyEma(Gps::Position& filtered, const Gps::Position& measurement);
 }
 
 void Gps::begin() {
@@ -71,6 +70,37 @@ const Gps::Data& Gps::getData() {
     return gpsData;
 }
 
+double Gps::getLatitude() {
+    return gpsData.position.latitude;
+}
+
+double Gps::getLongitude() {
+    return gpsData.position.longitude;
+}
+
+float Gps::getAltitude() {
+    return gpsData.position.altitude;
+}
+
+float Gps::getSpeed() {
+    return gpsData.speed;
+}
+
+float Gps::getCourse() {
+    return gpsData.course;
+}
+
+uint8_t Gps::getSatellites() {
+    return gpsData.satellites;
+}
+
+float Gps::getHdop() {
+    return gpsData.hdop;
+}
+
+DateTime Gps::getUtcTime() {
+    return gpsData.utcTime;
+}
 
 namespace {
     void updateStatus() {
@@ -87,6 +117,7 @@ namespace {
         if (previousStatus != gpsStatus) {
             if (gpsStatus == Gps::Status::LOCKED) {
                 System::setEvent(System::Event::GPS_LOCKED);
+                Serial.println("GPS locked");
             } else if (previousStatus == Gps::Status::LOCKED) {
                 System::setEvent(System::Event::GPS_LOST);
             }
@@ -126,8 +157,7 @@ namespace {
         } else {
             applyEma(
                 gpsData.position, 
-                gpsData.rawPosition, 
-                calculatePositionAlpha(gpsData.speed)
+                gpsData.rawPosition
             );
         }
     }
@@ -167,19 +197,13 @@ namespace {
 
     void applyEma(
         Gps::Position& filtered, 
-        const Gps::Position& measurement, 
-        double alpha
+        const Gps::Position& measurement
     ) {
+        const double alpha = Config::GPS::POSITION_ALPHA;
         const double beta = 1.0 - alpha;
         filtered.latitude = beta * filtered.latitude + alpha * measurement.latitude;
         filtered.longitude = beta * filtered.longitude + alpha * measurement.longitude;
         filtered.altitude = beta * filtered.altitude + alpha * measurement.altitude;
 
-    }
-
-    double calculatePositionAlpha(float speed) {
-        float t = speed / Config::GPS::MAX_SPEED;
-        t = std::min(std::max(t, 0.0f), 1.0f);
-        return Config::GPS::MIN_ALPHA + t * (Config::GPS::MAX_ALPHA - Config::GPS::MIN_ALPHA);
     }
 }

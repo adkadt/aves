@@ -1,39 +1,19 @@
-#ifndef CONFIG_HPP
-#define CONFIG_HPP
+#pragma once
 
 #include <cstdint>
 #include "system/system.hpp"
 
-namespace Pins {
-    // LED
-    constexpr uint8_t LED = 21;
-    
-    // GPS
-    constexpr uint8_t GPS_RX = 2;
-    constexpr uint8_t GPS_TX = 3;
-    constexpr uint8_t GPS_FIX = 4;
-    constexpr uint8_t GPS_PPS = 5;   
-    
-    // LoRa
-    constexpr uint8_t LORA_SCK = 11;
-    constexpr uint8_t LORA_MISO = 10;
-    constexpr uint8_t LORA_MOSI = 9;
-    constexpr uint8_t LORA_CS = 8;
-    constexpr uint8_t LORA_RST = 7;
-    constexpr uint8_t LORA_DIO0 = 12; // G0, IRQ/ DIO0
-
-    // Misc
-    constexpr uint8_t VBAT_SENSE = 1;
-    constexpr uint8_t BUZZER = 6;
-    constexpr uint8_t MODE_SWITCH = 13;
-}
-
 namespace Config {
+    // This hardware revision has no physical mode switch.
+    constexpr bool MODE_SWITCH_ENABLED = false;
     constexpr System::Mode PRIMARY_MODE = System::Mode::FLIGHT;
     constexpr System::Mode SECONDARY_MODE = System::Mode::GROUND;
 
     // Serial Config
     constexpr uint32_t BAUD_RATE = 115200;
+
+    constexpr uint8_t DEVICE_ID = 1;
+    constexpr uint8_t PAIRED_DEVICE_ID = 2;
     
     // GPS Config
     namespace GPS {
@@ -41,9 +21,7 @@ namespace Config {
         constexpr uint32_t TIMEOUT_MS = 3000;
     
         // EMA
-        constexpr double MIN_ALPHA = 0.1;
-        constexpr double MAX_ALPHA = 0.8;
-        constexpr float MAX_SPEED = 50.0f;
+        constexpr double POSITION_ALPHA = 0.25;
     }
 
     // LoRa Config
@@ -80,6 +58,33 @@ namespace Config {
         // EMA
         constexpr float VOLTAGE_FILTER_ALPHA  = 0.3f;
     }
+
+    namespace Flight {
+        constexpr uint32_t HEARTBEAT_INTERVAL = 15000;
+        constexpr uint32_t GPS_TELEMETRY_INTERVAL = 1000;
+    }
 }
 
-#endif
+namespace Pins {
+    // LED
+    constexpr uint8_t LED = 21;
+    
+    // GPS
+    constexpr uint8_t GPS_RX = 2;
+    constexpr uint8_t GPS_TX = 3;
+    constexpr uint8_t GPS_FIX = 4;
+    constexpr uint8_t GPS_PPS = 5;   
+    
+    // LoRa
+    constexpr uint8_t LORA_SCK = 11;
+    constexpr uint8_t LORA_MISO = 10;
+    constexpr uint8_t LORA_MOSI = 9;
+    constexpr uint8_t LORA_CS = 8;
+    constexpr uint8_t LORA_RST = 7;
+    constexpr uint8_t LORA_DIO0 = 12; // G0, IRQ/ DIO0
+
+    // Misc
+    constexpr uint8_t VBAT_SENSE = 1;
+    constexpr uint8_t BUZZER = 6;
+    constexpr uint8_t MODE_SWITCH = 13;
+}

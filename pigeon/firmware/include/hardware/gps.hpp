@@ -36,6 +36,18 @@ namespace Gps {
 
     Status getStatus();
     const Data& getData();
+
+    double getLatitude();
+    double getLongitude();
+    float getAltitude();
+
+    float getSpeed();
+    float getCourse();
+
+    uint8_t getSatellites();
+    float getHdop();
+
+    DateTime getUtcTime();
 }
 
 #endif // GPS_HPP
