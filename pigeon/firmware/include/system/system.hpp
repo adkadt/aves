@@ -6,6 +6,9 @@ namespace System {
     void begin();
     void update();
 
+    uint8_t getDeviceId();
+    uint8_t getPairedDeviceId();
+
     // Modes
     enum class Mode {
         FLIGHT,
@@ -92,9 +95,11 @@ namespace System {
     void clearWarning(Warning warning);
     bool hasWarning(Warning warning);
     bool hasWarning();
-
+    uint32_t getWarnings();
+    
     // Events
     void setEvent(Event event);
     bool hasEvent(Event event);
     bool hasEvent();
+    uint32_t getErrors();
 }

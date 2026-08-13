@@ -28,7 +28,9 @@ namespace {
 }
 
 void System::begin() {
-    pinMode(Pins::MODE_SWITCH, INPUT);
+    if (Config::MODE_SWITCH_ENABLED) {
+        pinMode(Pins::MODE_SWITCH, INPUT);
+    }
 
     // Mode
     lastMode = readModeSwitch();
@@ -68,6 +70,14 @@ void System::update() {
     nextEvents = 0;
 }
 
+// Get IDs for transmission
+uint8_t System::getDeviceId() {
+    return Config::DEVICE_ID;
+}
+
+uint8_t System::getPairedDeviceId() {
+    return Config::PAIRED_DEVICE_ID;
+}
 
 // Mode Functions
 System::Mode System::getMode() {
@@ -119,6 +129,10 @@ bool System::hasError() {
     return currentErrors != 0;
 }
 
+uint32_t System::getErrors() {
+    return currentErrors;
+}
+
 
 // Warning Functions
 void System::setWarning(System::Warning warning) {
@@ -135,6 +149,10 @@ bool System::hasWarning(System::Warning warning) {
 
 bool System::hasWarning() {
     return currentWarnings != 0;
+}
+
+uint32_t System::getWarnings() {
+    return currentWarnings;
 }
 
 
@@ -155,6 +173,10 @@ bool System::hasEvent() {
 // private implementation
 namespace {
     System::Mode readModeSwitch() {
+        if (!Config::MODE_SWITCH_ENABLED) {
+            return Config::PRIMARY_MODE;
+        }
+
         if (digitalRead(Pins::MODE_SWITCH) == HIGH)
             return Config::PRIMARY_MODE;
         else
