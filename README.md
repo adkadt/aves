@@ -3,7 +3,7 @@
 # AVES
 ### Aerospace Vehicle Embedded Suite
 
-*A personal collection of open-source avionics projects for model rocketry.*
+*A personal collection of avionics projects for model rocketry.*
 
 </div>
 
@@ -14,8 +14,6 @@
 AVES is a collection of hardware and software projects developed for model rockets. The goal is to design reliable, flight-ready avionics while documenting the engineering process along the way.
 
 Each project is developed independently and focuses on solving a specific problem, such as flight computers, telemetry, or tracking.
-
-While AVES is currently a personal project, all repositories are open source and may serve as useful references for others interested in rocketry and embedded systems.
 
 ---
 
