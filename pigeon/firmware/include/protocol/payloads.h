@@ -4,7 +4,7 @@
 
 namespace Payload {
 
-    struct Heartbeat {
+    struct __attribute__((packed)) Heartbeat {
         uint32_t uptime;
 
         uint8_t mode;
@@ -16,7 +16,7 @@ namespace Payload {
         uint32_t warnings;
     };
 
-    struct GpsTelemetry {
+    struct __attribute__((packed)) GpsTelemetry {
         // Position
         int32_t latitude;
         int32_t longitude;
