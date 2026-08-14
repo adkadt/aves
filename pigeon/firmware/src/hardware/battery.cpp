@@ -25,6 +25,8 @@ void Battery::begin() {
         Pins::VBAT_SENSE, 
         ADC_ATTENUATION
     );
+
+    Battery::update();
 }
 
 void Battery::update() {

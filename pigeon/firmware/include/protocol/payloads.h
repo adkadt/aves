@@ -9,7 +9,10 @@ namespace Payload {
 
         uint8_t mode;
         uint8_t state;
+        
         uint8_t batteryStatus;
+        uint16_t batteryVoltage;
+
         uint8_t gpsStatus;
 
         uint32_t errors;

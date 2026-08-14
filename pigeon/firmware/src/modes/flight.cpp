@@ -19,6 +19,8 @@ namespace {
 }
 
 void Mode::Flight::begin() {
+    sendHeartbeat();
+
     uint32_t now = millis();
 
     lastHeartbeatTime = now;
@@ -35,9 +37,11 @@ void Mode::Flight::update() {
         sendHeartbeat();
     }
 
-    if (now - lastGpsTelemetryTime >= Config::Flight::GPS_TELEMETRY_INTERVAL) {
-        lastGpsTelemetryTime = now;
-        sendGpsTelemetry();
+    if (Gps::getStatus() == Gps::Status::LOCKED) {
+        if (now - lastGpsTelemetryTime >= Config::Flight::GPS_TELEMETRY_INTERVAL) {
+            lastGpsTelemetryTime = now;
+            sendGpsTelemetry();
+        }
     }
 }
 
@@ -50,6 +54,8 @@ namespace {
         payload.state = static_cast<uint8_t>(System::getState());
 
         payload.batteryStatus = static_cast<uint8_t>(Battery::getStatus());
+        payload.batteryVoltage = Battery::getVoltage() * 100;
+
         payload.gpsStatus = static_cast<uint8_t>(Gps::getStatus());
 
         payload.errors = System::getErrors();
