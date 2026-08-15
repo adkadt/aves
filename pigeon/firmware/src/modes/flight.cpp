@@ -16,6 +16,9 @@ namespace {
 
     uint32_t lastHeartbeatTime= millis();
     uint32_t lastGpsTelemetryTime = millis();
+
+    double maxAltitude = 0;
+    double minAltitude = INFINITY;
 }
 
 void Mode::Flight::begin() {
@@ -42,6 +45,15 @@ void Mode::Flight::update() {
             lastGpsTelemetryTime = now;
             sendGpsTelemetry();
         }
+        
+        if (Gps::getAltitude() > maxAltitude)
+            maxAltitude = Gps::getAltitude();
+        if (Gps::getAltitude() < minAltitude)
+            minAltitude = Gps::getAltitude();
+    }
+
+    if (maxAltitude - minAltitude > 50) {
+        System::setState(System::State::RECOVERY);
     }
 }
 
@@ -78,6 +90,9 @@ namespace {
         payload.latitude = Gps::getLatitude() * 100000;
         payload.longitude = Gps::getLongitude() * 100000;
         payload.altitude = Gps::getAltitude() * 100000;
+
+        payload.maxAltitude = maxAltitude * 100000;
+        payload.minAltitude = minAltitude * 100000;
 
         payload.speed = Gps::getSpeed() * 100000;
         payload.course = Gps::getCourse() * 100000;

@@ -24,7 +24,8 @@ namespace System {
         GPS_LOCK, // flight mode use only
         REMOTE_WAITING, // ground mode use only
         REMOTE_CONNECTED, // ground mode use only
-        ERROR
+        RECOVERY,
+        ERROR,
     };
 
     // Errors

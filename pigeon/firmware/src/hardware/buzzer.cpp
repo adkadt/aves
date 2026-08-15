@@ -18,6 +18,7 @@ namespace {
             void play(const BuzzerNote (&notes)[N]);
             void update();
             void stop();
+            bool isPlaying() const;
 
         private:
             const BuzzerNote* notes = nullptr;
@@ -63,6 +64,11 @@ namespace {
         { 523, 200 }, // C5
         { 0,   200 },
     };
+
+    const BuzzerNote recoveryNotes[] = {
+        { 2200, 300 },
+        {    0, 1700 },
+    };
 }
 
 
@@ -99,6 +105,15 @@ void Buzzer::update() {
             default:
                 break;
         }
+    }
+
+    // Recovery buzzer
+    if (System::getState() == System::State::RECOVERY) {
+        if (!buzzerPlayer.isPlaying())
+            buzzerPlayer.play(recoveryNotes);
+
+        buzzerPlayer.update();
+        return;
     }
 
     // update buzzer player
@@ -168,4 +183,8 @@ namespace {
         index = 0;
         lastUpdate = 0;
     }   
+
+    bool BuzzerPlayer::isPlaying() const {
+        return playing;
+    }
 }

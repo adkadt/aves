@@ -6,8 +6,8 @@
 namespace Config {
     // This hardware revision has no physical mode switch.
     constexpr bool MODE_SWITCH_ENABLED = false;
-    constexpr System::Mode PRIMARY_MODE = System::Mode::GROUND; // FLIGHT
-    constexpr System::Mode SECONDARY_MODE = System::Mode::GROUND;
+    constexpr System::Mode PRIMARY_MODE = System::Mode::FLIGHT; // FLIGHT
+    constexpr System::Mode SECONDARY_MODE = System::Mode::GROUND; // GROUND
 
     // Serial Config
     constexpr uint32_t BAUD_RATE = 115200;

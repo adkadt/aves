@@ -24,6 +24,8 @@ namespace Payload {
         int32_t latitude;
         int32_t longitude;
         int32_t altitude;
+        int32_t maxAltitude;
+        int32_t minAltitude;
 
         // Movement
         uint32_t speed;

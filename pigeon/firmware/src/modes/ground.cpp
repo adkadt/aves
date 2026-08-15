@@ -30,6 +30,8 @@ namespace {
         double latitude;
         double longitude;
         double altitude;
+        double maxAltitude;
+        double minAltitude;
 
         double speed;
         double course;
@@ -124,6 +126,8 @@ namespace {
         if (packet.length != sizeof(Payload::GpsTelemetry))
             return;
 
+        remoteState.connected = true;
+
         Payload::GpsTelemetry payload{};
         uint32_t now = millis();
 
@@ -134,8 +138,13 @@ namespace {
         remoteState.latitude = payload.latitude / 100000.0;
         remoteState.longitude = payload.longitude / 100000.0;
         remoteState.altitude = payload.altitude / 100000.0;
+
+        remoteState.maxAltitude = payload.maxAltitude / 100000.0;
+        remoteState.minAltitude = payload.minAltitude / 100000.0;
+
         remoteState.speed = payload.speed / 100000.0;
         remoteState.course = payload.course / 100000.0;
+        
         remoteState.satellites = payload.satellites;
 
         printGpsState();
@@ -236,6 +245,14 @@ namespace {
 
         Serial.print("Altitude:            ");
         Serial.print(remoteState.altitude, 2);
+        Serial.println(" m");
+
+        Serial.print("Max Altitude:        ");
+        Serial.print(remoteState.maxAltitude, 2);
+        Serial.println(" m");
+
+        Serial.print("Min Altitude:        ");
+        Serial.print(remoteState.minAltitude, 2);
         Serial.println(" m");
 
         Serial.print("Speed:               ");

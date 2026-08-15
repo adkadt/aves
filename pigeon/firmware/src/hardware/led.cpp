@@ -105,12 +105,12 @@ void Led::update() {
     if (System::hasError()) {
         // errors
         updateError();
-    } else if (System::hasWarning()) {
-        // warnings
-        updateWarning();
     } else if (System::hasEvent()) {
         // handle new events
         handleEvents();
+    } else if (System::hasWarning()) {
+        // warnings
+        updateWarning();
     } else {
         // normal state
         updateState();
