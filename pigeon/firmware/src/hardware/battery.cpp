@@ -55,6 +55,8 @@ namespace {
             batStatus = Battery::Status::NOMINAL_VOLTAGE;
         } else if (filteredBatteryVoltage >= Config::Battery::CRITICAL_VOLTAGE) {
             batStatus = Battery::Status::LOW_VOLTAGE;
+        } else if (filteredBatteryVoltage < Config::Battery::MEASURE_THRESHOLD_VOLTAGE) {
+            batStatus = Battery::Status::UNKNOWN_VOLTAGE;
         } else {
             batStatus = Battery::Status::CRITICAL_VOLTAGE;
         }

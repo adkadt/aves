@@ -18,8 +18,8 @@ namespace {
     
     // State Colors
     constexpr uint32_t COLOR_STARTUP = 0x0000FFu; // blue
-    constexpr uint32_t COLOR_GPS_SEARCHING = 0x0000FFu; // blue
-    constexpr uint32_t COLOR_GPS_LOCK = 0x00FF00u; // green
+    constexpr uint32_t COLOR_SEARCHING = 0x0000FFu; // blue
+    constexpr uint32_t COLOR_CONNECTED = 0x00FF00u; // green
     constexpr uint32_t COLOR_OFF = 0x000000u; // black
     
     // Error Colors
@@ -30,7 +30,7 @@ namespace {
 
     // Event Colors
     constexpr uint32_t COLOR_LORA_TX = 0x00BFFFu; // cyan
-    constexpr uint32_t COLOR_LORA_RX = 0xFF8000u; // orange
+    constexpr uint32_t COLOR_LORA_RX = 0x8000FFu; // purple
     
     enum class Pattern {
         NONE,
@@ -66,6 +66,9 @@ namespace {
     void updateWarning();
     void handleEvents();
     void updateState();
+
+    void updateFlightState();
+    void updateGroundState();
 
     // helpers
     void updateSolid();
@@ -196,11 +199,12 @@ namespace {
             setIndication(Pattern::BLINK, COLOR_WARNING);
             return;
         } 
-        
+
         if (System::hasWarning(System::Warning::BATTERY_LOW)) {
             setIndication(Pattern::PULSE, COLOR_WARNING);
             return;
         }
+
     }
   
     void handleEvents() {
@@ -216,15 +220,48 @@ namespace {
     }
 
     void updateState() {
+        switch (System::getMode()) {
+            case System::Mode::GROUND:
+                updateGroundState();
+                break;
+
+            case System::Mode::FLIGHT:
+                updateFlightState();
+                break;
+
+            default:
+                setIndication(Pattern::SOLID, COLOR_OFF);
+                break;
+        }
+    }
+
+    void updateFlightState() {
         switch (System::getState()) {
             case System::State::STARTUP:
                 ::setIndication(Pattern::SOLID, COLOR_STARTUP);
                 break;
             case System::State::GPS_SEARCHING:
-                ::setIndication(Pattern::PULSE, COLOR_GPS_SEARCHING);
+                ::setIndication(Pattern::PULSE, COLOR_SEARCHING);
                 break;
             case System::State::GPS_LOCK:
-                ::setIndication(Pattern::SOLID, COLOR_GPS_LOCK);
+                ::setIndication(Pattern::SOLID, COLOR_CONNECTED);
+                break;
+            default:
+                ::setIndication(Pattern::SOLID, COLOR_OFF);
+                break;
+        }
+    }
+
+    void updateGroundState() {
+        switch (System::getState()) {
+            case System::State::STARTUP:
+                ::setIndication(Pattern::SOLID, COLOR_STARTUP);
+                break;
+            case System::State::REMOTE_WAITING:
+                ::setIndication(Pattern::PULSE, COLOR_SEARCHING);
+                break;
+            case System::State::REMOTE_CONNECTED:
+                ::setIndication(Pattern::SOLID, COLOR_CONNECTED);
                 break;
             default:
                 ::setIndication(Pattern::SOLID, COLOR_OFF);

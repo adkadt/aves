@@ -6,7 +6,7 @@
 namespace Config {
     // This hardware revision has no physical mode switch.
     constexpr bool MODE_SWITCH_ENABLED = false;
-    constexpr System::Mode PRIMARY_MODE = System::Mode::FLIGHT;
+    constexpr System::Mode PRIMARY_MODE = System::Mode::GROUND; // FLIGHT
     constexpr System::Mode SECONDARY_MODE = System::Mode::GROUND;
 
     // Serial Config
@@ -52,8 +52,9 @@ namespace Config {
 
         // Battery Thresholds
         constexpr float MIN_USB_VOLTAGE = 4.7f;
-        constexpr float LOW_VOLTAGE = 3.7f;
+        constexpr float LOW_VOLTAGE = 3.6f;
         constexpr float CRITICAL_VOLTAGE = 3.3f;
+        constexpr float MEASURE_THRESHOLD_VOLTAGE = 1.0f;
 
         // EMA
         constexpr float VOLTAGE_FILTER_ALPHA  = 0.3f;
@@ -62,6 +63,10 @@ namespace Config {
     namespace Flight {
         constexpr uint32_t HEARTBEAT_INTERVAL = 15000;
         constexpr uint32_t GPS_TELEMETRY_INTERVAL = 1000;
+    }
+
+    namespace Ground {
+        constexpr uint32_t CONNECTION_TIMEOUT = 60000;
     }
 }
 

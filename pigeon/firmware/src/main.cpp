@@ -69,18 +69,21 @@ void loop() {
 }
 
 void updateSystemState() {
-    switch (Gps::getStatus()) {
-        case Gps::Status::DISCONNECTED:
-            System::setError(System::Error::GPS_DISCONNECTED);
-            break;
-        case Gps::Status::LOCKED:
-            System::setState(System::State::GPS_LOCK);
-            break;
-        case Gps::Status::SEARCHING:
-            System::setState(System::State::GPS_SEARCHING);
-            break;
-        default:
-            break;
+
+    if (System::getMode() == System::Mode::FLIGHT) {
+        switch (Gps::getStatus()) {
+            case Gps::Status::DISCONNECTED:
+                System::setError(System::Error::GPS_DISCONNECTED);
+                break;
+            case Gps::Status::LOCKED:
+                System::setState(System::State::GPS_LOCK);
+                break;
+            case Gps::Status::SEARCHING:
+                System::setState(System::State::GPS_SEARCHING);
+                break;
+            default:
+                break;
+        }
     }
 
     switch (LoRa::getStatus()) {

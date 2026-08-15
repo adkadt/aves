@@ -20,9 +20,10 @@ namespace System {
     enum class State {
         OFF,
         STARTUP,
-        GPS_SEARCHING,
-        GPS_LOCK,
-        TRANSMITTING,
+        GPS_SEARCHING, // flight mode use only
+        GPS_LOCK, // flight mode use only
+        REMOTE_WAITING, // ground mode use only
+        REMOTE_CONNECTED, // ground mode use only
         ERROR
     };
 
@@ -51,7 +52,7 @@ namespace System {
         LORA_WEAK_SIGNAL,
         
         // Battery
-        BATTERY_LOW
+        BATTERY_LOW,
     };
     
     // Events
