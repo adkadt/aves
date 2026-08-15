@@ -135,8 +135,8 @@ namespace {
 
         remoteState.lastGpsTelemetryTime = now;
 
-        remoteState.latitude = payload.latitude / 100000.0;
-        remoteState.longitude = payload.longitude / 100000.0;
+        remoteState.latitude = payload.latitude / 10000000.0;
+        remoteState.longitude = payload.longitude / 10000000.0;
         remoteState.altitude = payload.altitude / 100000.0;
 
         remoteState.maxAltitude = payload.maxAltitude / 100000.0;
@@ -238,10 +238,10 @@ namespace {
         Serial.println("----------------------------------------");
 
         Serial.print("Latitude:            ");
-        Serial.println(remoteState.latitude, 5);
+        Serial.println(remoteState.latitude, 7);
 
         Serial.print("Longitude:           ");
-        Serial.println(remoteState.longitude, 5);
+        Serial.println(remoteState.longitude, 7);
 
         Serial.print("Altitude:            ");
         Serial.print(remoteState.altitude, 2);

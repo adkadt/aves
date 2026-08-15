@@ -11,7 +11,7 @@
 #include <Arduino.h>
 
 namespace {
-    void sendHeartbeat();
+    bool sendHeartbeat();
     void sendGpsTelemetry();
 
     uint32_t lastHeartbeatTime= millis();
@@ -38,9 +38,7 @@ void Mode::Flight::update() {
     if (now - lastHeartbeatTime >= Config::Flight::HEARTBEAT_INTERVAL) {
         lastHeartbeatTime = now;
         sendHeartbeat();
-    }
-
-    if (Gps::getStatus() == Gps::Status::LOCKED) {
+    } else if (Gps::getStatus() == Gps::Status::LOCKED) {
         if (now - lastGpsTelemetryTime >= Config::Flight::GPS_TELEMETRY_INTERVAL) {
             lastGpsTelemetryTime = now;
             sendGpsTelemetry();
@@ -52,13 +50,13 @@ void Mode::Flight::update() {
             minAltitude = Gps::getAltitude();
     }
 
-    if (maxAltitude - minAltitude > 50) {
+    if (maxAltitude - minAltitude > 50 && maxAltitude - minAltitude < 99999) {
         System::setState(System::State::RECOVERY);
     }
 }
 
 namespace {
-    void sendHeartbeat() {
+    bool sendHeartbeat() {
         Payload::Heartbeat payload{};
 
         payload.uptime = millis();
@@ -87,8 +85,8 @@ namespace {
     void sendGpsTelemetry() {
         Payload::GpsTelemetry payload{};
 
-        payload.latitude = Gps::getLatitude() * 100000;
-        payload.longitude = Gps::getLongitude() * 100000;
+        payload.latitude = Gps::getLatitude() * 10000000;
+        payload.longitude = Gps::getLongitude() * 10000000;
         payload.altitude = Gps::getAltitude() * 100000;
 
         payload.maxAltitude = maxAltitude * 100000;
